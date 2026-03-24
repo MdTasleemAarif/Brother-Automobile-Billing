@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Bill {
+  id             String   @id @default(cuid())
+  documentType   String   // ESTIMATE | PROFORMA | TAX_INVOICE
+  documentNumber String?
+  date           DateTime @default(now())
+  jobCardNo      String?
+  vehicleNo      String
+  advisorName    String?
+  serviceType    String?
+
+  // Garage info (pre-filled)
+  garageName    String @default("BROTHERS AUTOMOBILES")
+  garageAddress String @default("Plot 92/A1, , Autonagar, Beside Wallmart,, Srinagar Jn, VISAKHAPATNAM, Andhra Pradesh (AP) - 530012.")
+  garageGstin   String @default("37BPKPS3819B1ZR")
+  garageContact String @default("8688401177")
+  garageEmail   String @default("brothersautomobilesvsp@gmail.com")
+
+  // Customer
+  customerName  String
+  customerPhone String?
+  customerEmail String?
+
+  // Vehicle
+  vehicleName String
+  kilometer   Int?
+  color       String?
+  fuel        String?
+
+  // Insurance Company
+  companyName     String?
+  companyMobile   String?
+  companyAddress  String?
+  companyLocation String?
+  companyCity     String?
+  companyState    String?
+  companyPincode  String?
+  companyGstin    String?
+
+  // GST Rate
+  gstRate Float @default(18)
+
+  parts    Part[]
+  services Service[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Part {
+  id            String @id @default(cuid())
+  billId        String
+  bill          Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+  serialNo      Int
+  name          String
+  description   String @default("Part")
+  hsnSac        String @default("87081090")
+  gstRate       Float  @default(18)
+  quantity      Float  @default(1)
+  unitPrice     Float  @default(0)
+  payableAmount Float  @default(0)
+}
+
+model Service {
+  id            String @id @default(cuid())
+  billId        String
+  bill          Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+  serialNo      Int
+  name          String
+  description   String @default("Labour")
+  hsnSac        String @default("998714")
+  gstRate       Float  @default(18)
+  quantity      Float  @default(1)
+  unitPrice     Float  @default(0)
+  payableAmount Float  @default(0)
+}

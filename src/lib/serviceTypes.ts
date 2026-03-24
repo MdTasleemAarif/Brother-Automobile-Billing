@@ -1,0 +1,16 @@
+export const SERVICE_TYPES = [
+  "Body Shop",
+  "General Service",
+  "Periodic Maintenance",
+  "Mechanical Repair",
+  "Electrical Work",
+  "AC Service",
+  "Engine Repair",
+  "Transmission Service",
+  "Brake Service",
+  "Suspension Work",
+  "Wheel Alignment & Balancing",
+  "Battery Service",
+  "Detailing / Car Wash",
+  "Insurance Claim Repair",
+] as const;
