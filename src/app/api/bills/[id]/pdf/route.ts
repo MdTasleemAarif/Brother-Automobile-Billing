@@ -42,7 +42,7 @@ export async function GET(
       logoBase64,
     });
 
-    const buffer = await renderToBuffer(element);
+    const buffer = await renderToBuffer(element as any);
 
     const docLabel =
       bill.documentType === "ESTIMATE"
@@ -53,7 +53,7 @@ export async function GET(
 
     const filename = `${docLabel}_${bill.vehicleNo}_${bill.id.slice(0, 8)}.pdf`;
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
