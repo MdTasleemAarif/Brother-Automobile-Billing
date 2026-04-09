@@ -15,14 +15,26 @@ export async function GET() {
   }
 }
 
+/** Auto-generate a short unique invoice number: BA-YYYYMM-NNN */
+async function generateInvoiceNumber(): Promise<string> {
+  const now = new Date();
+  const ym = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const count = await prisma.bill.count();
+  const seq = String(count + 1).padStart(3, "0");
+  return `BA-${ym}-${seq}`;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: BillFormData = await req.json();
 
+    // Auto-generate invoice number if not provided
+    const documentNumber = body.documentNumber?.trim() || await generateInvoiceNumber();
+
     const bill = await prisma.bill.create({
       data: {
         documentType: body.documentType,
-        documentNumber: body.documentNumber || null,
+        documentNumber,
         date: new Date(body.date),
         jobCardNo: body.jobCardNo || null,
         vehicleNo: body.vehicleNo,
@@ -32,6 +44,7 @@ export async function POST(req: NextRequest) {
         garageAddress: body.garageAddress,
         garageGstin: body.garageGstin,
         garageContact: body.garageContact,
+        garageAltContact: (body as any).garageAltContact || "8374042537",
         garageEmail: body.garageEmail,
         customerName: body.customerName,
         customerPhone: body.customerPhone || null,

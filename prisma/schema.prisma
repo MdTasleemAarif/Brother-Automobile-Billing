@@ -21,8 +21,9 @@ model Bill {
   garageName    String @default("BROTHERS AUTOMOBILES")
   garageAddress String @default("Plot 92/A1, , Autonagar, Beside Wallmart,, Srinagar Jn, VISAKHAPATNAM, Andhra Pradesh (AP) - 530012.")
   garageGstin   String @default("37BPKPS3819B1ZR")
-  garageContact String @default("8688401177")
-  garageEmail   String @default("brothersautomobilesvsp@gmail.com")
+  garageContact    String @default("8688401177")
+  garageAltContact String @default("8374042537")
+  garageEmail      String @default("brothersautomobilesvsp@gmail.com")
 
   // Customer
   customerName  String

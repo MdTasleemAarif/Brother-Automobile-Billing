@@ -68,7 +68,7 @@ export default async function BillDetailPage({
         <div className="flex gap-3">
           <a
             href={`/api/bills/${bill.id}/pdf`}
-            target="_blank"
+            download
             className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition text-sm flex items-center gap-2"
           >
             ⬇ Download PDF

@@ -27,6 +27,7 @@ const DEFAULT_GARAGE = {
     "Plot 92/A1, , Autonagar, Beside Wallmart,, Srinagar Jn, VISAKHAPATNAM, Andhra Pradesh (AP) - 530012.",
   garageGstin: "37BPKPS3819B1ZR",
   garageContact: "8688401177",
+  garageAltContact: "8374042537",
   garageEmail: "brothersautomobilesvsp@gmail.com",
 };
 

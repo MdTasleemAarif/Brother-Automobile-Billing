@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
+import path from "path";
 import {
   Document,
   Page,
@@ -20,14 +21,15 @@ import {
 } from "../calculations";
 import { numberToWords } from "../numberToWords";
 
-// Register Noto Sans (all subset - includes ₹ symbol) as secondary font
+// Use local TTF files — react-pdf only supports TTF, not WOFF/WOFF2
+const FONTS_DIR = path.resolve(process.cwd(), "public", "fonts");
 Font.register({
   family: "NotoSans",
   fonts: [
-    { src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@5.0.6/files/noto-sans-all-400-normal.woff", fontWeight: 400 },
-    { src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@5.0.6/files/noto-sans-all-700-normal.woff", fontWeight: 700 },
-    { src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@5.0.6/files/noto-sans-all-400-normal.woff", fontWeight: 400, fontStyle: "italic" as const },
-    { src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@5.0.6/files/noto-sans-all-700-normal.woff", fontWeight: 700, fontStyle: "italic" as const },
+    { src: path.join(FONTS_DIR, "NotoSans-Regular.ttf"), fontWeight: 400 },
+    { src: path.join(FONTS_DIR, "NotoSans-Bold.ttf"),    fontWeight: 700 },
+    { src: path.join(FONTS_DIR, "NotoSans-Regular.ttf"), fontWeight: 400, fontStyle: "italic" as const },
+    { src: path.join(FONTS_DIR, "NotoSans-Bold.ttf"),    fontWeight: 700, fontStyle: "italic" as const },
   ],
 });
 Font.registerHyphenationCallback((word: string) => [word]);
@@ -263,10 +265,10 @@ const ESTIMATE_PART_COLS = [
   { key: "hsnSac", label: "HSN / SAC", w: 40, align: "center" },
   { key: "gstRate", label: "GST Rate (%)", w: 28, align: "center" },
   { key: "quantity", label: "Quantity", w: 28, align: "center" },
-  { key: "unitPrice", label: "Unit Price (₹)", w: 50, align: "right" },
-  { key: "payableAmount", label: "Payable Amount (₹)", w: 56, align: "right" },
-  { key: "taxable", label: "Taxable (₹)", w: 50, align: "right" },
-  { key: "partsTotal", label: "Parts Total (₹)", w: 55, align: "right" },
+  { key: "unitPrice", label: "Unit Price (Rs.)", w: 50, align: "right" },
+  { key: "payableAmount", label: "Payable Amount (Rs.)", w: 56, align: "right" },
+  { key: "taxable", label: "Taxable (Rs.)", w: 50, align: "right" },
+  { key: "partsTotal", label: "Parts Total (Rs.)", w: 55, align: "right" },
 ];
 
 const STANDARD_PART_COLS = [
@@ -276,9 +278,9 @@ const STANDARD_PART_COLS = [
   { key: "hsnSac", label: "HSN / SAC", w: 45, align: "center" },
   { key: "gstRate", label: "GST Rate (%)", w: 32, align: "center" },
   { key: "quantity", label: "Quantity", w: 30, align: "center" },
-  { key: "unitPrice", label: "Unit Price (₹)", w: 62, align: "right" },
-  { key: "taxable", label: "Taxable (₹)", w: 64, align: "right" },
-  { key: "partsTotal", label: "Parts Total (₹)", w: 68, align: "right" },
+  { key: "unitPrice", label: "Unit Price (Rs.)", w: 62, align: "right" },
+  { key: "taxable", label: "Taxable (Rs.)", w: 64, align: "right" },
+  { key: "partsTotal", label: "Parts Total (Rs.)", w: 68, align: "right" },
 ];
 
 const ESTIMATE_SVC_COLS = [
@@ -288,10 +290,10 @@ const ESTIMATE_SVC_COLS = [
   { key: "hsnSac", label: "HSN / SAC", w: 40, align: "center" },
   { key: "gstRate", label: "GST Rate (%)", w: 28, align: "center" },
   { key: "quantity", label: "Quantity", w: 28, align: "center" },
-  { key: "unitPrice", label: "Unit Price (₹)", w: 50, align: "right" },
-  { key: "payableAmount", label: "Payable Amount (₹)", w: 56, align: "right" },
-  { key: "taxable", label: "Taxable (₹)", w: 50, align: "right" },
-  { key: "labourTotal", label: "Labour Total (₹)", w: 55, align: "right" },
+  { key: "unitPrice", label: "Unit Price (Rs.)", w: 50, align: "right" },
+  { key: "payableAmount", label: "Payable Amount (Rs.)", w: 56, align: "right" },
+  { key: "taxable", label: "Taxable (Rs.)", w: 50, align: "right" },
+  { key: "labourTotal", label: "Labour Total (Rs.)", w: 55, align: "right" },
 ];
 
 const STANDARD_SVC_COLS = [
@@ -301,9 +303,9 @@ const STANDARD_SVC_COLS = [
   { key: "hsnSac", label: "HSN / SAC", w: 45, align: "center" },
   { key: "gstRate", label: "GST Rate (%)", w: 32, align: "center" },
   { key: "quantity", label: "Quantity", w: 30, align: "center" },
-  { key: "unitPrice", label: "Unit Price (₹)", w: 62, align: "right" },
-  { key: "taxable", label: "Taxable (₹)", w: 64, align: "right" },
-  { key: "labourTotal", label: "Labour Total (₹)", w: 68, align: "right" },
+  { key: "unitPrice", label: "Unit Price (Rs.)", w: 62, align: "right" },
+  { key: "taxable", label: "Taxable (Rs.)", w: 64, align: "right" },
+  { key: "labourTotal", label: "Labour Total (Rs.)", w: 68, align: "right" },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -345,24 +347,23 @@ function SubtotalBlock({
   gst: number;
   sectionTotal: number;
 }) {
+  const rows = [
+    { lbl: "Taxable Value", val: fmt(taxable) },
+    { lbl: "GST Total",     val: fmt(gst) },
+    { lbl: "Discount Total", val: "0.00" },
+    { lbl: label,           val: fmt(sectionTotal) },
+  ];
   return (
     <View style={s.subBox}>
-      <View style={s.subRow}>
-        <Text style={s.subLabel}>Taxable Value</Text>
-        <Text style={s.subVal}>₹ {fmt(taxable)}</Text>
-      </View>
-      <View style={s.subRow}>
-        <Text style={s.subLabel}>GST Total</Text>
-        <Text style={s.subVal}>₹ {fmt(gst)}</Text>
-      </View>
-      <View style={s.subRow}>
-        <Text style={s.subLabel}>Discount Total</Text>
-        <Text style={s.subVal}>₹ 0.00</Text>
-      </View>
-      <View style={s.subRow}>
-        <Text style={s.subLabel}>{label}</Text>
-        <Text style={s.subVal}>₹ {fmt(sectionTotal)}</Text>
-      </View>
+      {rows.map((r) => (
+        <View key={r.lbl} style={s.subRow}>
+          <Text style={s.subLabel}>{r.lbl}</Text>
+          <View style={[s.subVal, { flexDirection: "row", justifyContent: "flex-end" }]}>
+            <Rupee />
+            <Text style={s.subVal}> {r.val}</Text>
+          </View>
+        </View>
+      ))}
     </View>
   );
 }
@@ -567,7 +568,7 @@ function InfoBlock({
         </Text>
         <Text style={{ marginBottom: 1 }}>{bill.garageAddress}</Text>
         <Text>GSTIN: {bill.garageGstin}</Text>
-        <Text>Contact: {bill.garageContact}</Text>
+        <Text>Contact: {bill.garageContact}{(bill as any).garageAltContact ? ` / ${(bill as any).garageAltContact}` : ""}</Text>
         <Text>Email: {bill.garageEmail}</Text>
 
         {/* Separator line between garage info and insurance company */}
@@ -650,12 +651,12 @@ function InfoBlock({
 
       {/* RIGHT */}
       <View style={s.infoRight}>
-        {/* Row 1: Doc number | Date */}
+        {/* Row 1: Vehicle No | Date */}
         <View style={s.infoRow}>
           <View style={s.infoCell}>
             <Text>
-              <Text style={s.bold}>{docNumLabel}: </Text>
-              {bill.documentNumber || ""}
+              <Text style={s.bold}>Vehicle No: </Text>
+              {bill.vehicleNo}
             </Text>
           </View>
           <View style={s.infoCellLast}>
@@ -665,18 +666,18 @@ function InfoBlock({
             </Text>
           </View>
         </View>
-        {/* Row 2: Service Type | Vehicle No */}
+        {/* Row 2: Invoice No | Service Type */}
         <View style={s.infoRow}>
           <View style={s.infoCell}>
             <Text>
-              <Text style={s.bold}>Service Type: </Text>
-              {bill.serviceType || ""}
+              <Text style={s.bold}>{docNumLabel}: </Text>
+              {bill.documentNumber || ""}
             </Text>
           </View>
           <View style={s.infoCellLast}>
             <Text>
-              <Text style={s.bold}>Vehicle No: </Text>
-              {bill.vehicleNo}
+              <Text style={s.bold}>Service Type: </Text>
+              {bill.serviceType || ""}
             </Text>
           </View>
         </View>
@@ -853,7 +854,10 @@ function GrandTotalBlock({
       {rows.map((r) => (
         <View key={r.label} style={s.grandRow}>
           <Text style={s.grandLabel}>{r.label}</Text>
-          <Text style={s.grandVal}>Rs. {r.val}</Text>
+          <View style={[s.grandVal, { flexDirection: "row", justifyContent: "flex-end" }]}>
+            <Rupee />
+            <Text style={{ fontSize: 7.5, fontFamily: "Helvetica-Bold" }}> {r.val}</Text>
+          </View>
         </View>
       ))}
     </View>
