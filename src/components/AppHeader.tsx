@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -17,6 +18,22 @@ function isActive(pathname: string, href: string) {
 
 export function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  if (pathname === "/login") return null;
+
+  const logout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.replace("/login");
+      router.refresh();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#87d8d8] bg-[#fffaf0]/95 backdrop-blur">
@@ -70,6 +87,15 @@ export function AppHeader() {
           >
             + New Bill
           </Link>
+
+          <button
+            type="button"
+            onClick={logout}
+            disabled={isLoggingOut}
+            className="shrink-0 rounded-md border border-[#f47d61]/50 bg-white px-1.5 py-1.5 text-[9px] font-extrabold text-[#a33f2f] shadow-sm transition hover:bg-[#fff0eb] disabled:opacity-60 sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm"
+          >
+            {isLoggingOut ? "..." : "Logout"}
+          </button>
         </div>
       </div>
     </header>
