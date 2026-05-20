@@ -27,6 +27,7 @@ export interface ServiceRow {
 export interface BillFormData {
   documentType: DocumentType;
   documentNumber: string;
+  documentNumberAuto?: boolean;
   date: string;
   jobCardNo: string;
   vehicleNo: string;
@@ -38,6 +39,7 @@ export interface BillFormData {
   garageAddress: string;
   garageGstin: string;
   garageContact: string;
+  garageAltContact: string;
   garageEmail: string;
 
   // Customer
@@ -72,6 +74,10 @@ export interface BillWithItems {
   id: string;
   documentType: string;
   documentNumber: string | null;
+  isLocked: boolean;
+  chainId: string | null;
+  sourceBillId: string | null;
+  syncedFromUpdatedAt: Date | null;
   date: Date;
   jobCardNo: string | null;
   vehicleNo: string;
@@ -81,6 +87,7 @@ export interface BillWithItems {
   garageAddress: string;
   garageGstin: string;
   garageContact: string;
+  garageAltContact: string;
   garageEmail: string;
   customerName: string;
   customerPhone: string | null;

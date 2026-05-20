@@ -34,7 +34,7 @@ export async function GET(
         logoBase64 = logoBuffer.toString("base64");
       }
     } catch {
-      // No logo — will render placeholder
+      // No logo - will render placeholder
     }
 
     const element = createElement(BillPdf, {

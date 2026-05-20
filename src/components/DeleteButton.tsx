@@ -15,7 +15,8 @@ export function DeleteButton({ billId }: { billId: string }) {
       if (res.ok) {
         router.push("/");
       } else {
-        alert("Failed to delete bill");
+        const data = await res.json().catch(() => null);
+        alert(data?.error || "Failed to delete bill");
         setDeleting(false);
       }
     } catch {
@@ -28,9 +29,9 @@ export function DeleteButton({ billId }: { billId: string }) {
     <button
       onClick={handleDelete}
       disabled={deleting}
-      className="bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-4 py-2 rounded-lg transition text-sm disabled:opacity-50"
+      className="rounded-lg border border-[#f47d61]/50 bg-[#ffe1d8] px-4 py-2 text-sm font-extrabold text-[#9d351f] transition hover:bg-[#f47d61] hover:text-white disabled:opacity-50"
     >
-      {deleting ? "Deleting..." : "🗑 Delete"}
+      {deleting ? "Deleting..." : "Delete"}
     </button>
   );
 }

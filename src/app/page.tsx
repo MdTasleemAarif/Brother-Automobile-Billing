@@ -11,6 +11,7 @@ export default async function HomePage() {
       id: true,
       documentNumber: true,
       documentType: true,
+      isLocked: true,
       customerName: true,
       vehicleName: true,
       vehicleNo: true,
@@ -20,33 +21,42 @@ export default async function HomePage() {
   });
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">All Bills</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            {bills.length} document{bills.length !== 1 ? "s" : ""} total
-          </p>
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#0f9fa6]">
+              Billing Workspace
+            </p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight text-[#082342]">
+              All Bills
+            </h1>
+            <p className="mt-1 text-sm font-medium text-[#35526f]">
+              Filter and open Estimate, Proforma, and Tax Invoice documents from one register.
+            </p>
+          </div>
+
+          <Link
+            href="/bills/new"
+            className="inline-flex items-center justify-center rounded-lg bg-[#082342] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#0f9fa6]"
+          >
+            + Create New Bill
+          </Link>
         </div>
-        <Link
-          href="/bills/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg transition text-sm"
-        >
-          + Create New Bill
-        </Link>
-      </div>
+      </section>
 
       {bills.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-16 text-center">
-          <div className="text-5xl mb-4">📄</div>
-          <h2 className="text-xl font-semibold text-slate-700 mb-2">No bills yet</h2>
-          <p className="text-slate-500 mb-6">
-            Create your first Estimate, Proforma Invoice, or Tax Invoice.
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-12 text-center shadow-sm">
+          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-lg bg-[#d9f3f2] text-xl font-black text-[#0f9fa6]">
+            BA
+          </div>
+          <h2 className="text-xl font-black text-[#082342]">No bills yet</h2>
+          <p className="mt-2 text-sm font-medium text-[#35526f]">
+            Start with an Estimate, then convert it to Proforma and Tax Invoice.
           </p>
           <Link
             href="/bills/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg transition"
+            className="mt-6 inline-flex rounded-lg bg-[#082342] px-6 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0f9fa6]"
           >
             Create First Bill
           </Link>

@@ -21,6 +21,22 @@ export function getServiceTaxable(
   return service.unitPrice * service.quantity;
 }
 
+export function getTaxableUnitFromMrp(
+  mrpTotal: number,
+  quantity: number,
+  gstRate: number
+): number {
+  const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+  const safeGstRate = Number.isFinite(gstRate) ? gstRate : 0;
+  const gstMultiplier = 1 + safeGstRate / 100;
+
+  if (!Number.isFinite(mrpTotal) || mrpTotal <= 0 || gstMultiplier <= 0) {
+    return 0;
+  }
+
+  return mrpTotal / safeQuantity / gstMultiplier;
+}
+
 /** Row total including GST */
 export function getRowTotal(taxable: number, gstRate: number): number {
   return taxable * (1 + gstRate / 100);

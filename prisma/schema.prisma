@@ -16,6 +16,12 @@ model Bill {
   vehicleNo      String
   advisorName    String?
   serviceType    String?
+  isLocked       Boolean  @default(false)
+  chainId        String?
+  sourceBillId   String?
+  syncedFromUpdatedAt DateTime?
+  sourceBill     Bill?    @relation("BillConversion", fields: [sourceBillId], references: [id], onDelete: SetNull)
+  convertedBills Bill[]   @relation("BillConversion")
 
   // Garage info (pre-filled)
   garageName    String @default("BROTHERS AUTOMOBILES")
@@ -54,6 +60,9 @@ model Bill {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([chainId])
+  @@index([sourceBillId])
 }
 
 model Part {
@@ -82,4 +91,13 @@ model Service {
   quantity      Float  @default(1)
   unitPrice     Float  @default(0)
   payableAmount Float  @default(0)
+}
+
+model DocumentSequence {
+  id           String @id @default(cuid())
+  documentType String
+  year         Int
+  lastNumber   Int    @default(0)
+
+  @@unique([documentType, year])
 }

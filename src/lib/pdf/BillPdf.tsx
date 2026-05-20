@@ -21,121 +21,165 @@ import {
 } from "../calculations";
 import { numberToWords } from "../numberToWords";
 
-// Use local TTF files — react-pdf only supports TTF, not WOFF/WOFF2
-const FONTS_DIR = path.resolve(process.cwd(), "public", "fonts");
+const WINDOWS_FONTS_DIR = "C:\\Windows\\Fonts";
+
 Font.register({
-  family: "NotoSans",
+  family: "TimesNewRoman",
   fonts: [
-    { src: path.join(FONTS_DIR, "NotoSans-Regular.ttf"), fontWeight: 400 },
-    { src: path.join(FONTS_DIR, "NotoSans-Bold.ttf"),    fontWeight: 700 },
-    { src: path.join(FONTS_DIR, "NotoSans-Regular.ttf"), fontWeight: 400, fontStyle: "italic" as const },
-    { src: path.join(FONTS_DIR, "NotoSans-Bold.ttf"),    fontWeight: 700, fontStyle: "italic" as const },
+    { src: path.join(WINDOWS_FONTS_DIR, "times.ttf"), fontWeight: 400 },
+    { src: path.join(WINDOWS_FONTS_DIR, "timesbd.ttf"), fontWeight: 700 },
+    {
+      src: path.join(WINDOWS_FONTS_DIR, "timesi.ttf"),
+      fontWeight: 400,
+      fontStyle: "italic" as const,
+    },
+    {
+      src: path.join(WINDOWS_FONTS_DIR, "timesbi.ttf"),
+      fontWeight: 700,
+      fontStyle: "italic" as const,
+    },
   ],
 });
-Font.registerHyphenationCallback((word: string) => [word]);
 
-// Helper: renders the ₹ symbol using NotoSans (Helvetica doesn't support it)
-function Rupee() {
-  return <Text style={{ fontFamily: "NotoSans" }}>{"\u20B9"}</Text>;
-}
+Font.registerHyphenationCallback((word: string) => [word]);
 
 const C = {
   border: "#000000",
-  headerBg: "#e8e8e8",
-  subBg: "#f4f4f4",
+  headerBg: "#f3f3f3",
+  subBg: "#f7f7f7",
   text: "#000000",
 };
 
 const s = StyleSheet.create({
   page: {
-    fontFamily: "Helvetica",
-    fontSize: 7,
+    fontFamily: "TimesNewRoman",
+    fontSize: 9.4,
     color: C.text,
-    paddingTop: 18,
+    paddingTop: 14,
     paddingBottom: 18,
-    paddingLeft: 28,
-    paddingRight: 28,
-    lineHeight: 1.3,
+    paddingLeft: 16,
+    paddingRight: 16,
+    lineHeight: 1.35,
   },
-  // ─── HEADER ──────────────────────────────────────────────────────────
-  headerWrap: { flexDirection: "row", alignItems: "center", marginBottom: 3 },
-  logo: { width: 46, height: 46 },
+  printHeader: {
+    height: 15,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 3,
+  },
+  printHeaderLeft: { width: "33.33%", fontSize: 7.3 },
+  printHeaderCenter: { width: "33.33%", fontSize: 7.3, textAlign: "center" },
+  printHeaderRight: { width: "33.33%" },
+  headerWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+    minHeight: 62,
+  },
+  logo: { width: 74, height: 60, objectFit: "contain" },
   logoPlaceholder: {
-    width: 46,
-    height: 46,
-    backgroundColor: "#ddd",
-    borderRadius: 4,
+    width: 74,
+    height: 60,
+    backgroundColor: "#dddddd",
     alignItems: "center",
     justifyContent: "center",
   },
-  headerCenter: { flex: 1, alignItems: "center", paddingHorizontal: 10 },
-  h1: { fontFamily: "Helvetica-Bold", fontSize: 13, textAlign: "center", marginBottom: 6 },
-  h2: { fontSize: 7.5, textAlign: "center", lineHeight: 1.5 },
-  docTypeLabel: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 10,
+  headerCenter: { flex: 1, alignItems: "center", paddingHorizontal: 4 },
+  h1: {
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 15.4,
     textAlign: "center",
-    textDecoration: "underline",
-    marginBottom: 5,
-    marginTop: 1,
+    marginBottom: 6,
   },
-  // ─── INFO BLOCK ───────────────────────────────────────────────────────
+  hAddress: { fontSize: 9.3, textAlign: "center", lineHeight: 1.6 },
+  h2: { fontSize: 9.9, textAlign: "center", lineHeight: 1.4 },
+  docTypeLabel: {
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 12.2,
+    textAlign: "center",
+    marginBottom: 8,
+  },
   infoBlock: {
     flexDirection: "row",
     borderWidth: 1,
     borderColor: C.border,
-    marginBottom: 5,
+    marginBottom: 8,
   },
   infoLeft: {
-    width: "44%",
+    width: "50%",
     borderRightWidth: 1,
     borderRightColor: C.border,
-    padding: 4,
   },
-  infoRight: { flex: 1 },
+  infoRight: { width: "50%" },
+  garageInfoCell: {
+    minHeight: 60,
+    padding: "4 5",
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+  },
+  partyInfoCell: {
+    minHeight: 68,
+    padding: "4 5",
+  },
   infoRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: C.border,
-    minHeight: 14,
+    minHeight: 23,
   },
-  infoRowLast: { flexDirection: "row", minHeight: 14 },
-  infoCell: {
+  infoMergedRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+    minHeight: 46,
+  },
+  infoLeftStack: {
     flex: 1,
-    padding: "2 4",
     borderRightWidth: 1,
     borderRightColor: C.border,
   },
-  infoCellLast: { flex: 1, padding: "2 4" },
-  infoFullCell: {
+  infoStackRow: {
     flex: 1,
-    padding: "2 4",
-    borderBottomWidth: 0,
-  },
-  bold: { fontFamily: "Helvetica-Bold" },
-  separatorLine: {
-    borderBottomWidth: 0.5,
+    padding: "4 5",
+    justifyContent: "center",
+    borderBottomWidth: 1,
     borderBottomColor: C.border,
-    marginTop: 4,
-    marginBottom: 4,
   },
-  sectionLabel: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 8,
-    backgroundColor: C.headerBg,
-    padding: "3 6",
-    marginBottom: 0,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderBottomWidth: 0,
+  infoStackRowLast: {
+    flex: 1,
+    padding: "4 5",
+    justifyContent: "center",
   },
-  // ─── TABLES ───────────────────────────────────────────────────────────
+  serviceTypeMergedCell: {
+    flex: 1,
+    padding: "4 5",
+    justifyContent: "center",
+  },
+  vehicleNoText: {
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 11.2,
+  },
+  infoCell: {
+    flex: 1,
+    padding: "4 5",
+    borderRightWidth: 1,
+    borderRightColor: C.border,
+    justifyContent: "center",
+  },
+  infoCellLast: {
+    flex: 1,
+    padding: "4 5",
+    justifyContent: "center",
+  },
+  bold: { fontFamily: "TimesNewRoman", fontWeight: 700 },
   tableWrap: {
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: C.border,
-    marginBottom: 1,
   },
   tHdr: {
     flexDirection: "row",
@@ -147,168 +191,288 @@ const s = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: C.border,
-    minHeight: 13,
+    minHeight: 16,
   },
   tCell: {
-    padding: "1.5 2.5",
+    padding: "2.5 3",
     borderRightWidth: 1,
     borderRightColor: C.border,
     justifyContent: "center",
   },
-  tCellLast: { padding: "1.5 2.5", justifyContent: "center" },
-  tHdrText: { fontFamily: "Helvetica-Bold", fontSize: 6.5, textAlign: "center" },
-  tValText: { fontSize: 7, textAlign: "right" },
-  tNameText: { fontSize: 7 },
-  // ─── SUBTOTAL BOX ─────────────────────────────────────────────────────
+  tCellLast: { padding: "2.5 3", justifyContent: "center" },
+  tHdrText: {
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 7.9,
+    textAlign: "center",
+  },
+  tValText: { fontSize: 7.9, textAlign: "right", lineHeight: 1.25 },
+  tNameText: { fontSize: 7.9, lineHeight: 1.25 },
   subBox: {
-    flexDirection: "column",
-    alignItems: "flex-end",
-    marginBottom: 5,
+    flexDirection: "row",
+    minHeight: 46,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: C.border,
+    marginBottom: 8,
+  },
+  subBlank: { flex: 1 },
+  subPanel: {
+    width: 205,
+    borderLeftWidth: 1,
+    borderLeftColor: C.border,
+    paddingTop: 5,
+    paddingLeft: 9,
+    paddingRight: 7,
   },
   subRow: { flexDirection: "row", minHeight: 13, alignItems: "center" },
   subLabel: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.5,
-    width: 110,
-    textAlign: "right",
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 9,
+    width: 92,
+    textAlign: "left",
     paddingRight: 6,
   },
   subVal: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.5,
-    width: 85,
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 9,
+    width: 90,
     textAlign: "right",
   },
-  // ─── TAX TABLE ────────────────────────────────────────────────────────
+  subTotalRow: {
+    marginTop: 2,
+  },
+  subTotalText: {
+    fontSize: 9.8,
+  },
   taxWrap: {
     borderWidth: 1,
     borderColor: C.border,
-    marginBottom: 4,
-    marginTop: 2,
+    marginBottom: 10,
   },
   taxHdr: {
     flexDirection: "row",
     backgroundColor: C.headerBg,
     borderBottomWidth: 1,
     borderBottomColor: C.border,
-    minHeight: 13,
+    minHeight: 18,
   },
-  taxRow: { flexDirection: "row", minHeight: 13, alignItems: "center" },
+  taxRow: { flexDirection: "row", minHeight: 18, alignItems: "center" },
   taxCell: {
-    padding: "1.5 3",
+    padding: "2 3",
     borderRightWidth: 1,
     borderRightColor: C.border,
     justifyContent: "center",
     alignItems: "center",
   },
-  taxCellLast: { padding: "1.5 3", justifyContent: "center", alignItems: "center" },
-  // ─── GRAND TOTAL ──────────────────────────────────────────────────────
-  grandWrap: {
-    flexDirection: "column",
-    alignItems: "flex-end",
-    marginBottom: 5,
+  taxCellLast: {
+    padding: "2 3",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  grandRow: { flexDirection: "row", minHeight: 14, alignItems: "center" },
+  grandWrap: {
+    flexDirection: "row",
+    minHeight: 68,
+    borderWidth: 1,
+    borderColor: C.border,
+    marginBottom: 9,
+  },
+  grandBlank: { flex: 1 },
+  grandPanel: {
+    width: 235,
+    borderLeftWidth: 1,
+    borderLeftColor: C.border,
+    padding: "6 7",
+    justifyContent: "center",
+  },
+  grandRow: {
+    flexDirection: "row",
+    minHeight: 16,
+    alignItems: "center",
+    padding: "1.5 5",
+    justifyContent: "space-between",
+  },
+  grandTotalRow: {
+    flexDirection: "row",
+    minHeight: 22,
+    alignItems: "center",
+    backgroundColor: "#e9f2ff",
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: "4 5",
+    marginTop: 3,
+    justifyContent: "space-between",
+  },
   grandLabel: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.5,
-    width: 100,
-    textAlign: "right",
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 9.4,
+    width: 112,
+    textAlign: "left",
     paddingRight: 6,
   },
   grandVal: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.5,
-    width: 90,
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 9.4,
+    width: 108,
     textAlign: "right",
   },
-  // ─── SIGNATURE ────────────────────────────────────────────────────────
+  grandTotalText: {
+    fontFamily: "TimesNewRoman",
+    fontWeight: 700,
+    fontSize: 10.8,
+  },
+  amountWords: {
+    fontSize: 10.4,
+    marginBottom: 6,
+  },
+  certText: {
+    fontSize: 9.8,
+    marginTop: 5,
+    marginBottom: 1,
+    lineHeight: 1.35,
+  },
   sigRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 25,
+    marginTop: 14,
   },
   sigCell: { width: "33%", alignItems: "center" },
   sigLine: {
     borderTopWidth: 1,
     borderTopColor: C.border,
-    width: "90%",
-    marginBottom: 3,
+    width: "68%",
+    marginBottom: 1,
   },
-  sigText: { fontSize: 6.5, textAlign: "center" },
-  // misc
-  certText: {
-    fontSize: 6.5,
-    marginTop: 8,
-    marginBottom: 4,
-    fontStyle: "italic",
-  },
-  amountWords: {
-    fontSize: 7,
-    fontFamily: "Helvetica-Bold",
-    marginBottom: 3,
-  },
+  sigText: { fontSize: 8.2, textAlign: "center" },
   pageNo: {
     position: "absolute",
-    bottom: 8,
-    right: 28,
-    fontSize: 6.5,
+    bottom: 10,
+    right: 16,
+    fontSize: 10.8,
   },
 });
 
-// ─── COLUMN CONFIGS ────────────────────────────────────────────────────────────
+type DocumentKind = "ESTIMATE" | "PROFORMA" | "TAX_INVOICE";
 
-const ESTIMATE_PART_COLS = [
+type Column = {
+  key: string;
+  label: string;
+  w: number;
+  align: "left" | "center" | "right";
+};
+
+const ESTIMATE_PART_COLS: Column[] = [
   { key: "#", label: "#", w: 16, align: "center" },
-  { key: "name", label: "Part Name", w: 82, align: "left" },
-  { key: "description", label: "Description", w: 42, align: "center" },
-  { key: "hsnSac", label: "HSN / SAC", w: 40, align: "center" },
-  { key: "gstRate", label: "GST Rate (%)", w: 28, align: "center" },
-  { key: "quantity", label: "Quantity", w: 28, align: "center" },
-  { key: "unitPrice", label: "Unit Price (Rs.)", w: 50, align: "right" },
-  { key: "payableAmount", label: "Payable Amount (Rs.)", w: 56, align: "right" },
-  { key: "taxable", label: "Taxable (Rs.)", w: 50, align: "right" },
-  { key: "partsTotal", label: "Parts Total (Rs.)", w: 55, align: "right" },
+  { key: "name", label: "Part Name", w: 102, align: "left" },
+  { key: "description", label: "Description", w: 62, align: "center" },
+  { key: "hsnSac", label: "HSN /\nSAC", w: 50, align: "center" },
+  { key: "gstRate", label: "GST Rate\n(%)", w: 44, align: "center" },
+  { key: "quantity", label: "Quantity", w: 42, align: "center" },
+  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 58, align: "right" },
+  { key: "payableAmount", label: "Payable Amount\n(\u20B9)", w: 62, align: "right" },
+  { key: "taxable", label: "Taxable\n(\u20B9)", w: 64, align: "right" },
+  { key: "partsTotal", label: "Parts Total\n(MRP)", w: 80, align: "right" },
 ];
 
-const STANDARD_PART_COLS = [
+const STANDARD_PART_COLS: Column[] = [
   { key: "#", label: "#", w: 16, align: "center" },
-  { key: "name", label: "Part Name", w: 100, align: "left" },
-  { key: "description", label: "Description", w: 45, align: "center" },
-  { key: "hsnSac", label: "HSN / SAC", w: 45, align: "center" },
-  { key: "gstRate", label: "GST Rate (%)", w: 32, align: "center" },
-  { key: "quantity", label: "Quantity", w: 30, align: "center" },
-  { key: "unitPrice", label: "Unit Price (Rs.)", w: 62, align: "right" },
-  { key: "taxable", label: "Taxable (Rs.)", w: 64, align: "right" },
-  { key: "partsTotal", label: "Parts Total (Rs.)", w: 68, align: "right" },
+  { key: "name", label: "Part Name", w: 124, align: "left" },
+  { key: "description", label: "Description", w: 78, align: "center" },
+  { key: "hsnSac", label: "HSN /\nSAC", w: 54, align: "center" },
+  { key: "gstRate", label: "GST Rate\n(%)", w: 52, align: "center" },
+  { key: "quantity", label: "Quantity", w: 48, align: "center" },
+  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 68, align: "right" },
+  { key: "taxable", label: "Taxable\n(\u20B9)", w: 68, align: "right" },
+  { key: "partsTotal", label: "Parts Total\n(MRP)", w: 72, align: "right" },
 ];
 
-const ESTIMATE_SVC_COLS = [
+const ESTIMATE_SVC_COLS: Column[] = [
   { key: "#", label: "#", w: 16, align: "center" },
-  { key: "name", label: "Service", w: 82, align: "left" },
-  { key: "description", label: "Description", w: 42, align: "center" },
-  { key: "hsnSac", label: "HSN / SAC", w: 40, align: "center" },
-  { key: "gstRate", label: "GST Rate (%)", w: 28, align: "center" },
-  { key: "quantity", label: "Quantity", w: 28, align: "center" },
-  { key: "unitPrice", label: "Unit Price (Rs.)", w: 50, align: "right" },
-  { key: "payableAmount", label: "Payable Amount (Rs.)", w: 56, align: "right" },
-  { key: "taxable", label: "Taxable (Rs.)", w: 50, align: "right" },
-  { key: "labourTotal", label: "Labour Total (Rs.)", w: 55, align: "right" },
+  { key: "name", label: "Service", w: 102, align: "left" },
+  { key: "description", label: "Description", w: 62, align: "center" },
+  { key: "hsnSac", label: "HSN /\nSAC", w: 50, align: "center" },
+  { key: "gstRate", label: "GST Rate\n(%)", w: 44, align: "center" },
+  { key: "quantity", label: "Quantity", w: 42, align: "center" },
+  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 58, align: "right" },
+  { key: "payableAmount", label: "Payable Amount\n(\u20B9)", w: 62, align: "right" },
+  { key: "taxable", label: "Taxable\n(\u20B9)", w: 64, align: "right" },
+  { key: "labourTotal", label: "Labour Total\n(\u20B9)", w: 80, align: "right" },
 ];
 
-const STANDARD_SVC_COLS = [
+const STANDARD_SVC_COLS: Column[] = [
   { key: "#", label: "#", w: 16, align: "center" },
-  { key: "name", label: "Service", w: 100, align: "left" },
-  { key: "description", label: "Description", w: 45, align: "center" },
-  { key: "hsnSac", label: "HSN / SAC", w: 45, align: "center" },
-  { key: "gstRate", label: "GST Rate (%)", w: 32, align: "center" },
-  { key: "quantity", label: "Quantity", w: 30, align: "center" },
-  { key: "unitPrice", label: "Unit Price (Rs.)", w: 62, align: "right" },
-  { key: "taxable", label: "Taxable (Rs.)", w: 64, align: "right" },
-  { key: "labourTotal", label: "Labour Total (Rs.)", w: 68, align: "right" },
+  { key: "name", label: "Service", w: 124, align: "left" },
+  { key: "description", label: "Description", w: 78, align: "center" },
+  { key: "hsnSac", label: "HSN /\nSAC", w: 54, align: "center" },
+  { key: "gstRate", label: "GST Rate\n(%)", w: 52, align: "center" },
+  { key: "quantity", label: "Quantity", w: 48, align: "center" },
+  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 68, align: "right" },
+  { key: "taxable", label: "Taxable\n(\u20B9)", w: 68, align: "right" },
+  { key: "labourTotal", label: "Labour Total\n(\u20B9)", w: 72, align: "right" },
 ];
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function Rupee() {
+  return <Text style={{ fontFamily: "TimesNewRoman" }}>{"\u20B9"}</Text>;
+}
+
+function MoneyText({
+  value,
+  style,
+}: {
+  value: number;
+  style?: any;
+}) {
+  return (
+    <Text style={style}>
+      <Rupee /> {fmt(value)}
+    </Text>
+  );
+}
+
+function formatBillDate(date: Date) {
+  return new Date(date)
+    .toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+    .replace(",", "");
+}
+
+function formatPrintDateTime(date: Date) {
+  const d = new Date(date);
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const year = String(d.getFullYear()).slice(-2);
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const period = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${month}/${day}/${year}, ${hours}:${minutes} ${period}`;
+}
+
+function formatInsuranceAddress(bill: BillWithItems) {
+  const mainParts = [
+    bill.companyAddress,
+    bill.companyLocation,
+    bill.companyCity,
+  ]
+    .map((part) => part?.trim().replace(/[.,\s]+$/, ""))
+    .filter(Boolean);
+  const state = bill.companyState?.trim().replace(/[.,\s]+$/, "");
+  const pincode = bill.companyPincode?.trim().replace(/[.,\s]+$/, "");
+  const stateLine = [state, pincode ? `- ${pincode}` : ""]
+    .filter(Boolean)
+    .join(" ");
+  const address = [...mainParts, stateLine].filter(Boolean).join(", ");
+
+  return address ? `${address}.` : "";
+}
 
 function Cell({
   col,
@@ -316,12 +480,11 @@ function Cell({
   isHeader,
   children,
 }: {
-  col: (typeof ESTIMATE_PART_COLS)[0];
+  col: Column;
   isLast: boolean;
   isHeader?: boolean;
   children: React.ReactNode;
 }) {
-  const base = isLast ? s.tCellLast : s.tCell;
   const textStyle = isHeader
     ? s.tHdrText
     : col.align === "right"
@@ -329,8 +492,9 @@ function Cell({
     : col.align === "left"
     ? s.tNameText
     : { ...s.tValText, textAlign: "center" as const };
+
   return (
-    <View style={[base, { width: col.w, minWidth: col.w }]}>
+    <View style={[isLast ? s.tCellLast : s.tCell, { width: col.w }]}>
       <Text style={textStyle}>{children}</Text>
     </View>
   );
@@ -348,325 +512,92 @@ function SubtotalBlock({
   sectionTotal: number;
 }) {
   const rows = [
-    { lbl: "Taxable Value", val: fmt(taxable) },
-    { lbl: "GST Total",     val: fmt(gst) },
-    { lbl: "Discount Total", val: "0.00" },
-    { lbl: label,           val: fmt(sectionTotal) },
+    { lbl: "Taxable Value", val: taxable },
+    { lbl: "GST Total", val: gst },
+    { lbl: label, val: sectionTotal },
   ];
-  return (
-    <View style={s.subBox}>
-      {rows.map((r) => (
-        <View key={r.lbl} style={s.subRow}>
-          <Text style={s.subLabel}>{r.lbl}</Text>
-          <View style={[s.subVal, { flexDirection: "row", justifyContent: "flex-end" }]}>
-            <Rupee />
-            <Text style={s.subVal}> {r.val}</Text>
-          </View>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-// ─── PARTS TABLE ──────────────────────────────────────────────────────────────
-
-function PartsTable({
-  parts,
-  docType,
-  startSerial,
-}: {
-  parts: BillWithItems["parts"];
-  docType: string;
-  startSerial: number;
-}) {
-  const isEstimate = docType === "ESTIMATE";
-  const cols = isEstimate ? ESTIMATE_PART_COLS : STANDARD_PART_COLS;
 
   return (
-    <View style={s.tableWrap}>
-      {/* Header */}
-      <View style={s.tHdr}>
-        {cols.map((col, i) => (
-          <Cell key={col.key} col={col} isLast={i === cols.length - 1} isHeader>
-            {col.label}
-          </Cell>
-        ))}
+    <View style={s.subBox} wrap={false}>
+      <View style={s.subBlank} />
+      <View style={s.subPanel}>
+        {rows.map((row) => {
+          const isTotal = row.lbl === label;
+          return (
+            <View
+              key={row.lbl}
+              style={isTotal ? [s.subRow, s.subTotalRow] : s.subRow}
+            >
+              <Text style={isTotal ? [s.subLabel, s.subTotalText] : s.subLabel}>
+                {row.lbl}
+              </Text>
+              <MoneyText
+                value={row.val}
+                style={isTotal ? [s.subVal, s.subTotalText] : s.subVal}
+              />
+            </View>
+          );
+        })}
       </View>
-      {/* Rows */}
-      {parts.map((p, idx) => {
-        const taxable = getPartTaxable(
-          p as any,
-          docType as "ESTIMATE" | "PROFORMA" | "TAX_INVOICE"
-        );
-        const rowTotal = taxable * (1 + p.gstRate / 100);
-        return (
-          <View key={p.id || idx} style={s.tRow} wrap={false}>
-            {cols.map((col, ci) => {
-              let val: string;
-              switch (col.key) {
-                case "#":
-                  val = String(startSerial + idx);
-                  break;
-                case "name":
-                  val = p.name;
-                  break;
-                case "description":
-                  val = p.description;
-                  break;
-                case "hsnSac":
-                  val = p.hsnSac;
-                  break;
-                case "gstRate":
-                  val = String(p.gstRate);
-                  break;
-                case "quantity":
-                  val = fmt(p.quantity);
-                  break;
-                case "unitPrice":
-                  val = fmt(p.unitPrice);
-                  break;
-                case "payableAmount":
-                  val = fmt(p.payableAmount);
-                  break;
-                case "taxable":
-                  val = fmt(taxable);
-                  break;
-                case "partsTotal":
-                  val = fmt(rowTotal);
-                  break;
-                default:
-                  val = "";
-              }
-              return (
-                <Cell
-                  key={col.key}
-                  col={col}
-                  isLast={ci === cols.length - 1}
-                >
-                  {val}
-                </Cell>
-              );
-            })}
-          </View>
-        );
-      })}
     </View>
   );
 }
-
-// ─── SERVICES TABLE ───────────────────────────────────────────────────────────
-
-function ServicesTable({
-  services,
-  docType,
-  startSerial,
-}: {
-  services: BillWithItems["services"];
-  docType: string;
-  startSerial: number;
-}) {
-  const isEstimate = docType === "ESTIMATE";
-  const cols = isEstimate ? ESTIMATE_SVC_COLS : STANDARD_SVC_COLS;
-
-  return (
-    <View style={s.tableWrap}>
-      <View style={s.tHdr}>
-        {cols.map((col, i) => (
-          <Cell key={col.key} col={col} isLast={i === cols.length - 1} isHeader>
-            {col.label}
-          </Cell>
-        ))}
-      </View>
-      {services.map((sv, idx) => {
-        const taxable = getServiceTaxable(
-          sv as any,
-          docType as "ESTIMATE" | "PROFORMA" | "TAX_INVOICE"
-        );
-        const rowTotal = taxable * (1 + sv.gstRate / 100);
-        return (
-          <View key={sv.id || idx} style={s.tRow} wrap={false}>
-            {cols.map((col, ci) => {
-              let val: string;
-              switch (col.key) {
-                case "#":
-                  val = String(startSerial + idx);
-                  break;
-                case "name":
-                  val = sv.name;
-                  break;
-                case "description":
-                  val = sv.description;
-                  break;
-                case "hsnSac":
-                  val = sv.hsnSac;
-                  break;
-                case "gstRate":
-                  val = String(sv.gstRate);
-                  break;
-                case "quantity":
-                  val = fmt(sv.quantity);
-                  break;
-                case "unitPrice":
-                  val = fmt(sv.unitPrice);
-                  break;
-                case "payableAmount":
-                  val = fmt(sv.payableAmount);
-                  break;
-                case "taxable":
-                  val = fmt(taxable);
-                  break;
-                case "labourTotal":
-                  val = fmt(rowTotal);
-                  break;
-                default:
-                  val = "";
-              }
-              return (
-                <Cell
-                  key={col.key}
-                  col={col}
-                  isLast={ci === cols.length - 1}
-                >
-                  {val}
-                </Cell>
-              );
-            })}
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-// ─── INFO HEADER (left + right grid) ─────────────────────────────────────────
 
 function InfoBlock({
   bill,
-  docLabel,
   docNumLabel,
 }: {
   bill: BillWithItems;
-  docLabel: string;
   docNumLabel: string;
 }) {
-  const isEstimate = bill.documentType === "ESTIMATE";
-  const isProforma = bill.documentType === "PROFORMA";
-  const isTax = bill.documentType === "TAX_INVOICE";
-
-  const dateStr = new Date(bill.date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const insuranceAddress = formatInsuranceAddress(bill);
+  const dateStr = formatBillDate(bill.date);
 
   return (
     <View style={s.infoBlock}>
-      {/* LEFT */}
       <View style={s.infoLeft}>
-        <Text style={[s.bold, { fontSize: 7.5, marginBottom: 1 }]}>
-          {bill.garageName}
-        </Text>
-        <Text style={{ marginBottom: 1 }}>{bill.garageAddress}</Text>
-        <Text>GSTIN: {bill.garageGstin}</Text>
-        <Text>Contact: {bill.garageContact}{(bill as any).garageAltContact ? ` / ${(bill as any).garageAltContact}` : ""}</Text>
-        <Text>Email: {bill.garageEmail}</Text>
+        <View style={s.garageInfoCell}>
+          <Text style={[s.bold, { fontSize: 9, marginBottom: 2 }]}>
+            {bill.garageName}
+          </Text>
+          <Text>{bill.garageAddress}</Text>
+          <Text>GSTIN: {bill.garageGstin}</Text>
+          <Text>
+            Contact: {bill.garageContact}
+            {bill.garageAltContact ? ` / ${bill.garageAltContact}` : ""}
+          </Text>
+          <Text>Email: {bill.garageEmail}</Text>
+        </View>
 
-        {/* Separator line between garage info and insurance company */}
-        <View style={s.separatorLine} />
-
-        {/* Insurance */}
-        {bill.companyName && (
-          <>
+        <View style={s.partyInfoCell}>
+          {bill.companyName && (
             <Text>
               <Text style={s.bold}>Company Name: </Text>
               {bill.companyName}
             </Text>
-            {isEstimate && (
-              <>
-                {bill.companyState && (
-                  <Text>
-                    <Text style={s.bold}>State: </Text>
-                    {bill.companyState}
-                  </Text>
-                )}
-              </>
-            )}
-            {!isEstimate && (
-              <>
-                {bill.companyMobile && (
-                  <Text>
-                    <Text style={s.bold}>Mobile No: </Text>
-                    {bill.companyMobile}
-                  </Text>
-                )}
-                {bill.companyAddress && (
-                  <Text>
-                    <Text style={s.bold}>Address: </Text>
-                    {bill.companyAddress}
-                    {bill.companyLocation ? `, ${bill.companyLocation}` : ""}
-                    {bill.companyCity ? `, ${bill.companyCity}` : ""}
-                    {bill.companyState ? `, ${bill.companyState}` : ""}
-                    {bill.companyPincode ? ` - ${bill.companyPincode}.` : ""}
-                  </Text>
-                )}
-                {!bill.companyAddress && (
-                  <>
-                    {bill.companyLocation && (
-                      <Text>
-                        <Text style={s.bold}>Location: </Text>
-                        {bill.companyLocation}
-                      </Text>
-                    )}
-                    {bill.companyCity && (
-                      <Text>
-                        <Text style={s.bold}>city: </Text>
-                        {bill.companyCity}
-                      </Text>
-                    )}
-                    {bill.companyState && (
-                      <Text>
-                        <Text style={s.bold}>State: </Text>
-                        {bill.companyState}
-                      </Text>
-                    )}
-                    {bill.companyPincode && (
-                      <Text>
-                        <Text style={s.bold}>Pincode: </Text>
-                        {bill.companyPincode}
-                      </Text>
-                    )}
-                  </>
-                )}
-                {bill.companyGstin && (
-                  <Text>
-                    <Text style={s.bold}>GSTIN: </Text>
-                    {bill.companyGstin}
-                  </Text>
-                )}
-              </>
-            )}
-          </>
-        )}
+          )}
+          {bill.companyMobile && (
+            <Text>
+              <Text style={s.bold}>Mobile No: </Text>
+              {bill.companyMobile}
+            </Text>
+          )}
+          {insuranceAddress && (
+            <Text>
+              <Text style={s.bold}>Address: </Text>
+              {insuranceAddress}
+            </Text>
+          )}
+          {bill.companyGstin && (
+            <Text>
+              <Text style={s.bold}>GSTIN: </Text>
+              {bill.companyGstin.trim()}
+            </Text>
+          )}
+        </View>
       </View>
 
-      {/* RIGHT */}
       <View style={s.infoRight}>
-        {/* Row 1: Vehicle No | Date */}
-        <View style={s.infoRow}>
-          <View style={s.infoCell}>
-            <Text>
-              <Text style={s.bold}>Vehicle No: </Text>
-              {bill.vehicleNo}
-            </Text>
-          </View>
-          <View style={s.infoCellLast}>
-            <Text>
-              <Text style={s.bold}>Date: </Text>
-              {dateStr}
-            </Text>
-          </View>
-        </View>
-        {/* Row 2: Invoice No | Service Type */}
         <View style={s.infoRow}>
           <View style={s.infoCell}>
             <Text>
@@ -676,69 +607,260 @@ function InfoBlock({
           </View>
           <View style={s.infoCellLast}>
             <Text>
+              <Text style={s.bold}>Date: </Text>
+              {dateStr}
+            </Text>
+          </View>
+        </View>
+        <View style={s.infoMergedRow}>
+          <View style={s.infoLeftStack}>
+            <View style={s.infoStackRow}>
+              <Text>
+                <Text style={s.bold}>Vehicle No: </Text>
+                <Text style={s.vehicleNoText}>{bill.vehicleNo}</Text>
+              </Text>
+            </View>
+            <View style={s.infoStackRowLast}>
+              <Text>
+                <Text style={s.bold}>Advisor Name: </Text>
+                {bill.advisorName || ""}
+              </Text>
+            </View>
+          </View>
+          <View style={s.serviceTypeMergedCell}>
+            <Text>
               <Text style={s.bold}>Service Type: </Text>
               {bill.serviceType || ""}
             </Text>
           </View>
         </View>
-        {/* Row 3: Advisor */}
-        <View style={s.infoRow}>
-          <View style={s.infoCell}>
+
+        <View style={s.partyInfoCell}>
+          <Text>
+            <Text style={s.bold}>Customer : </Text>
+            {bill.customerName}
+          </Text>
+          <Text>
+            <Text style={s.bold}>Vehicle: </Text>
+            {bill.vehicleName}
+          </Text>
+          {bill.kilometer != null && (
             <Text>
-              <Text style={s.bold}>Advisor Name: </Text>
-              {bill.advisorName || ""}
+              <Text style={s.bold}>Kilometer: </Text>
+              {bill.kilometer}
             </Text>
-          </View>
-          <View style={s.infoCellLast}>
-          </View>
-        </View>
-        {/* Customer block */}
-        <View style={[s.infoRowLast, { flex: 1, padding: "3 4" }]}>
-          <View>
+          )}
+          {bill.color && (
             <Text>
-              <Text style={s.bold}>Customer: </Text>
-              {bill.customerName}
+              <Text style={s.bold}>Color : </Text>
+              {bill.color}
             </Text>
+          )}
+          {bill.fuel && (
             <Text>
-              <Text style={s.bold}>Vehicle: </Text>
-              {bill.vehicleName}
+              <Text style={s.bold}>Fuel: </Text>
+              {bill.fuel}
             </Text>
-            {bill.kilometer != null && (
-              <Text>
-                <Text style={s.bold}>Kilometer: </Text>
-                {bill.kilometer}
-              </Text>
-            )}
-            {bill.color && (
-              <Text>
-                <Text style={s.bold}>Color: </Text>
-                {bill.color}
-              </Text>
-            )}
-            {bill.fuel && (
-              <Text>
-                <Text style={s.bold}>Fuel: </Text>
-                {bill.fuel}
-              </Text>
-            )}
-            {bill.customerPhone && (
-              <Text>
-                <Text style={s.bold}>PH: </Text>
-                {bill.customerPhone}
-              </Text>
-            )}
+          )}
+          {bill.customerPhone && (
             <Text>
-              <Text style={s.bold}>Email: </Text>
-              {bill.customerEmail || ""}
+              <Text style={s.bold}>PH: </Text>
+              {bill.customerPhone}
             </Text>
-          </View>
+          )}
+          <Text>
+            <Text style={s.bold}>Email: </Text>
+            {bill.customerEmail || ""}
+          </Text>
         </View>
       </View>
     </View>
   );
 }
 
-// ─── TAX SUMMARY TABLE ────────────────────────────────────────────────────────
+function PartsTable({
+  parts,
+  docType,
+  startSerial,
+}: {
+  parts: BillWithItems["parts"];
+  docType: DocumentKind;
+  startSerial: number;
+}) {
+  const cols = docType === "ESTIMATE" ? ESTIMATE_PART_COLS : STANDARD_PART_COLS;
+
+  return (
+    <View style={s.tableWrap}>
+      <View style={s.tHdr}>
+        {cols.map((col, i) => (
+          <Cell key={col.key} col={col} isLast={i === cols.length - 1} isHeader>
+            {col.label}
+          </Cell>
+        ))}
+      </View>
+      {parts.map((part, idx) => {
+        const taxable = getPartTaxable(part as any, docType);
+        const rowTotal = taxable * (1 + part.gstRate / 100);
+
+        return (
+          <View key={part.id || idx} style={s.tRow} wrap={false}>
+            {cols.map((col, ci) => {
+              let val = "";
+              switch (col.key) {
+                case "#":
+                  val = String(startSerial + idx);
+                  break;
+                case "name":
+                  val = part.name;
+                  break;
+                case "description":
+                  val = part.description;
+                  break;
+                case "hsnSac":
+                  val = part.hsnSac;
+                  break;
+                case "gstRate":
+                  val = String(part.gstRate);
+                  break;
+                case "quantity":
+                  val = fmt(part.quantity);
+                  break;
+                case "unitPrice":
+                  val = fmt(part.unitPrice);
+                  break;
+                case "payableAmount":
+                  val = fmt(part.payableAmount);
+                  break;
+                case "taxable":
+                  val = fmt(taxable);
+                  break;
+                case "partsTotal":
+                  val = fmt(rowTotal);
+                  break;
+              }
+
+              return (
+                <Cell key={col.key} col={col} isLast={ci === cols.length - 1}>
+                  {val}
+                </Cell>
+              );
+            })}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function ServicesTable({
+  services,
+  docType,
+  startSerial,
+}: {
+  services: BillWithItems["services"];
+  docType: DocumentKind;
+  startSerial: number;
+}) {
+  const cols = docType === "ESTIMATE" ? ESTIMATE_SVC_COLS : STANDARD_SVC_COLS;
+
+  return (
+    <View style={s.tableWrap}>
+      <View style={s.tHdr}>
+        {cols.map((col, i) => (
+          <Cell key={col.key} col={col} isLast={i === cols.length - 1} isHeader>
+            {col.label}
+          </Cell>
+        ))}
+      </View>
+      {services.map((service, idx) => {
+        const taxable = getServiceTaxable(service as any, docType);
+        const rowTotal = taxable * (1 + service.gstRate / 100);
+
+        return (
+          <View key={service.id || idx} style={s.tRow} wrap={false}>
+            {cols.map((col, ci) => {
+              let val = "";
+              switch (col.key) {
+                case "#":
+                  val = String(startSerial + idx);
+                  break;
+                case "name":
+                  val = service.name;
+                  break;
+                case "description":
+                  val = service.description;
+                  break;
+                case "hsnSac":
+                  val = service.hsnSac;
+                  break;
+                case "gstRate":
+                  val = String(service.gstRate);
+                  break;
+                case "quantity":
+                  val = fmt(service.quantity);
+                  break;
+                case "unitPrice":
+                  val = fmt(service.unitPrice);
+                  break;
+                case "payableAmount":
+                  val = fmt(service.payableAmount);
+                  break;
+                case "taxable":
+                  val = fmt(taxable);
+                  break;
+                case "labourTotal":
+                  val = fmt(rowTotal);
+                  break;
+              }
+
+              return (
+                <Cell key={col.key} col={col} isLast={ci === cols.length - 1}>
+                  {val}
+                </Cell>
+              );
+            })}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function FinalSummaryBlock({
+  partsTotal,
+  labourTotal,
+  gstTotal,
+  grandTotal,
+}: {
+  partsTotal: number;
+  labourTotal: number;
+  gstTotal: number;
+  grandTotal: number;
+}) {
+  const rows = [
+    { label: "Parts Total", value: partsTotal },
+    { label: "Labour Total", value: labourTotal },
+    { label: "GST Total", value: gstTotal },
+  ];
+
+  return (
+    <View style={s.grandWrap} wrap={false}>
+      <View style={s.grandBlank} />
+      <View style={s.grandPanel}>
+        {rows.map((row) => (
+          <View key={row.label} style={s.grandRow}>
+            <Text style={s.grandLabel}>{row.label}</Text>
+            <MoneyText value={row.value} style={s.grandVal} />
+          </View>
+        ))}
+        <View style={s.grandTotalRow}>
+          <Text style={[s.grandLabel, s.grandTotalText]}>Grand Total</Text>
+          <MoneyText value={grandTotal} style={[s.grandVal, s.grandTotalText]} />
+        </View>
+      </View>
+    </View>
+  );
+}
 
 function TaxSummaryTable({
   totalTaxable,
@@ -752,28 +874,30 @@ function TaxSummaryTable({
   gstRate: number;
 }) {
   const halfRate = gstRate / 2;
-  const cellW = { w1: 140, w2: 40, w3: 80, w4: 40, w5: 80 };
+  const cellW = { w1: 205, w2: 52, w3: 136, w4: 52, w5: 135 };
+
   return (
     <View style={s.taxWrap} wrap={false}>
       <View style={s.taxHdr}>
         <View style={[s.taxCell, { width: cellW.w1 }]}>
-          <Text style={s.tHdrText}>Taxable Value (₹)</Text>
+          <Text style={s.tHdrText}>Taxable Value ({"\u20B9"})</Text>
         </View>
         <View style={[s.taxCell, { width: cellW.w2 }]}>
           <Text style={s.tHdrText}>CGST</Text>
           <Text style={s.tHdrText}>%</Text>
         </View>
         <View style={[s.taxCell, { width: cellW.w3 }]}>
-          <Text style={s.tHdrText}>Amt (₹)</Text>
+          <Text style={s.tHdrText}>Amt ({"\u20B9"})</Text>
         </View>
         <View style={[s.taxCell, { width: cellW.w4 }]}>
           <Text style={s.tHdrText}>SGST</Text>
           <Text style={s.tHdrText}>%</Text>
         </View>
         <View style={[s.taxCellLast, { width: cellW.w5 }]}>
-          <Text style={s.tHdrText}>Amt (₹)</Text>
+          <Text style={s.tHdrText}>Amt ({"\u20B9"})</Text>
         </View>
       </View>
+
       <View style={s.taxRow}>
         <View style={[s.taxCell, { width: cellW.w1 }]}>
           <Text style={[s.tValText, { textAlign: "right" }]}>
@@ -793,7 +917,7 @@ function TaxSummaryTable({
           <Text style={[s.tValText, { textAlign: "right" }]}>{fmt(sgst)}</Text>
         </View>
       </View>
-      {/* Total row */}
+
       <View
         style={[
           s.taxRow,
@@ -826,46 +950,6 @@ function TaxSummaryTable({
   );
 }
 
-// ─── GRAND TOTAL BLOCK ────────────────────────────────────────────────────────
-
-function GrandTotalBlock({
-  partsTaxable,
-  labourTaxable,
-  totalGst,
-  grandTotal,
-  roundOff,
-}: {
-  partsTaxable: number;
-  labourTaxable: number;
-  totalGst: number;
-  grandTotal: number;
-  roundOff: number;
-}) {
-  const rows = [
-    { label: "Parts Total", val: fmt(partsTaxable) },
-    { label: "Labour Total", val: fmt(labourTaxable) },
-    { label: "GST Total", val: fmt(totalGst) },
-    { label: "Grand Total", val: fmt(grandTotal) },
-    { label: "Round off", val: fmt(roundOff) },
-    { label: "Balance", val: fmt(roundOff) },
-  ];
-  return (
-    <View style={s.grandWrap} wrap={false}>
-      {rows.map((r) => (
-        <View key={r.label} style={s.grandRow}>
-          <Text style={s.grandLabel}>{r.label}</Text>
-          <View style={[s.grandVal, { flexDirection: "row", justifyContent: "flex-end" }]}>
-            <Rupee />
-            <Text style={{ fontSize: 7.5, fontFamily: "Helvetica-Bold" }}> {r.val}</Text>
-          </View>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-// ─── MAIN DOCUMENT ────────────────────────────────────────────────────────────
-
 export function BillPdf({
   bill,
   logoBase64,
@@ -873,19 +957,25 @@ export function BillPdf({
   bill: BillWithItems;
   logoBase64?: string | null;
 }) {
-  const docType = bill.documentType as "ESTIMATE" | "PROFORMA" | "TAX_INVOICE";
+  const docType = bill.documentType as DocumentKind;
   const docLabels = {
     ESTIMATE: { label: "Estimate", numLabel: "RFE No" },
     PROFORMA: { label: "Proforma Invoice", numLabel: "Proforma Invoice No" },
     TAX_INVOICE: { label: "Tax Invoice", numLabel: "Invoice No" },
   };
   const { label, numLabel } = docLabels[docType];
+  const printTitle =
+    docType === "ESTIMATE"
+      ? "Estimation"
+      : docType === "PROFORMA"
+      ? "Proforma Invoice"
+      : "Tax Invoice";
 
   const parts = [...bill.parts].sort((a, b) => a.serialNo - b.serialNo);
   const services = [...bill.services].sort((a, b) => a.serialNo - b.serialNo);
 
   const partTotals = calcPartsTotals(parts as any, docType);
-  const svcTotals = calcServicesTotals(services as any, docType);
+  const serviceTotals = calcServicesTotals(services as any, docType);
   const grand = calcGrandTotals(
     parts as any,
     services as any,
@@ -893,121 +983,114 @@ export function BillPdf({
     bill.gstRate
   );
 
-  const wordsStr = numberToWords(grand.roundOff);
-
-  const svcStartSerial = parts.length + 1;
+  const wordsStr = numberToWords(grand.grandTotal);
+  const serviceStartSerial = parts.length + 1;
+  const printDateTime = formatPrintDateTime(new Date());
 
   return (
     <Document>
-      <Page size="A4" style={s.page}>
-        {/* ── HEADER ── */}
+      <Page size="LETTER" style={s.page}>
+        <View style={s.printHeader} fixed>
+          <Text style={s.printHeaderLeft}>{printDateTime}</Text>
+          <Text style={s.printHeaderCenter}>
+            {printTitle} - Arixa Technologies
+          </Text>
+          <View style={s.printHeaderRight} />
+        </View>
+
+        <Text
+          style={s.pageNo}
+          fixed
+          render={({ pageNumber, totalPages }) =>
+            `Page ${pageNumber} of ${totalPages}`
+          }
+        />
+
         <View style={s.headerWrap}>
           {logoBase64 ? (
-            <Image
-              style={s.logo}
-              src={`data:image/png;base64,${logoBase64}`}
-            />
+            <Image style={s.logo} src={`data:image/png;base64,${logoBase64}`} />
           ) : (
             <View style={s.logoPlaceholder}>
-              <Text style={{ fontSize: 5, color: "#888" }}>LOGO</Text>
+              <Text style={{ fontSize: 7, color: "#888888" }}>LOGO</Text>
             </View>
           )}
           <View style={s.headerCenter}>
             <Text style={s.h1}>{bill.garageName}</Text>
-            <Text style={s.h2}>{bill.garageAddress}</Text>
+            <Text style={s.hAddress}>{bill.garageAddress}</Text>
             <Text style={s.h2}>GSTIN: {bill.garageGstin}</Text>
           </View>
-          <View style={{ width: 46 }} />
+          <View style={{ width: 78 }} />
         </View>
 
         <Text style={s.docTypeLabel}>{label}</Text>
 
-        {/* ── INFO BLOCK ── */}
-        <InfoBlock bill={bill} docLabel={label} docNumLabel={numLabel} />
+        <InfoBlock bill={bill} docNumLabel={numLabel} />
 
-        {/* ── PARTS TABLE ── */}
         {parts.length > 0 && (
           <>
-            <Text style={s.sectionLabel}>Parts / Spare Parts</Text>
             <PartsTable parts={parts} docType={docType} startSerial={1} />
             <SubtotalBlock
-              label="Round off"
+              label="Parts Total"
               taxable={partTotals.taxable}
               gst={partTotals.gst}
-              sectionTotal={Math.round(partTotals.total)}
+              sectionTotal={partTotals.total}
             />
           </>
         )}
 
-        {/* ── SERVICES TABLE ── */}
         {services.length > 0 && (
           <>
-            <Text style={s.sectionLabel}>Labour / Services</Text>
             <ServicesTable
               services={services}
               docType={docType}
-              startSerial={svcStartSerial}
+              startSerial={serviceStartSerial}
             />
             <SubtotalBlock
-              label="Round off"
-              taxable={svcTotals.taxable}
-              gst={svcTotals.gst}
-              sectionTotal={Math.round(svcTotals.total)}
+              label="Labour Total"
+              taxable={serviceTotals.taxable}
+              gst={serviceTotals.gst}
+              sectionTotal={serviceTotals.total}
             />
           </>
         )}
 
-        {/* ── TAX SUMMARY ── */}
-        <TaxSummaryTable
-          totalTaxable={grand.totalTaxable}
-          cgst={grand.cgst}
-          sgst={grand.sgst}
-          gstRate={bill.gstRate}
-        />
+        <View>
+          <FinalSummaryBlock
+            partsTotal={grand.partsTaxable}
+            labourTotal={grand.labourTaxable}
+            gstTotal={grand.totalGst}
+            grandTotal={grand.grandTotal}
+          />
 
-        {/* ── AMOUNT IN WORDS ── */}
-        <Text style={s.amountWords}>
-          Amount ( in Words ): {wordsStr}
-        </Text>
+          <TaxSummaryTable
+            totalTaxable={grand.totalTaxable}
+            cgst={grand.cgst}
+            sgst={grand.sgst}
+            gstRate={bill.gstRate}
+          />
 
-        {/* ── GRAND TOTAL ── */}
-        <GrandTotalBlock
-          partsTaxable={grand.partsTaxable}
-          labourTaxable={grand.labourTaxable}
-          totalGst={grand.totalGst}
-          grandTotal={grand.grandTotal}
-          roundOff={grand.roundOff}
-        />
+          <Text style={s.amountWords}>Amount ( in Words ): {wordsStr}</Text>
 
-        {/* ── CERTIFICATION ── */}
-        <Text style={s.certText}>
-          I certify that the work has been done to my satisfaction and that I
-          have taken delivery of the vehicle in good condition, with all items
-          /valuables and parts intact
-        </Text>
+          <Text style={s.certText}>
+            I certify that the work has been done to my satisfaction and that I
+            have taken delivery of the vehicle in good condition, with all items
+            /valuables and parts intact
+          </Text>
 
-        {/* ── SIGNATURE ROW ── */}
-        <View style={s.sigRow}>
-          {[
-            "Customer / Authorized Signatory",
-            "Service Advisor Signature",
-            "Cashier / Authorized Signature",
-          ].map((lbl) => (
-            <View key={lbl} style={s.sigCell}>
-              <View style={s.sigLine} />
-              <Text style={s.sigText}>{lbl}</Text>
-            </View>
-          ))}
+          <View style={s.sigRow}>
+            {[
+              "Customer / Authorized Signatory",
+              "Service Advisor Signature",
+              "Cashier / Authorized Signature",
+            ].map((labelText) => (
+              <View key={labelText} style={s.sigCell}>
+                <View style={s.sigLine} />
+                <Text style={s.sigText}>{labelText}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        {/* Page number */}
-        <Text
-          style={s.pageNo}
-          render={({ pageNumber, totalPages }) =>
-            `Page ${pageNumber} of ${totalPages}`
-          }
-          fixed
-        />
       </Page>
     </Document>
   );

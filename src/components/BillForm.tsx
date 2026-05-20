@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   BillFormData,
@@ -16,10 +16,12 @@ import {
   calcServicesTotals,
   fmt,
   getPartTaxable,
+  getTaxableUnitFromMrp,
   getServiceTaxable,
 } from "@/lib/calculations";
 import { INSURANCE_COMPANIES } from "@/lib/insuranceCompanies";
 import { SERVICE_TYPES } from "@/lib/serviceTypes";
+import { normalizeGstin, validateGstin } from "@/utils/validateGstin";
 
 const DEFAULT_GARAGE = {
   garageName: "BROTHERS AUTOMOBILES",
@@ -77,7 +79,7 @@ function newService(serialNo: number, gstRate: number): ServiceRow {
   return {
     serialNo,
     name: "",
-    description: "R&R",
+    description: "",
     hsnSac: "998714",
     gstRate,
     quantity: 1,
@@ -89,7 +91,7 @@ function newService(serialNo: number, gstRate: number): ServiceRow {
 // ─── SECTION LABEL ────────────────────────────────────────────────────────────
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide bg-slate-100 rounded px-3 py-1.5 mb-3">
+    <h2 className="mb-3 rounded-lg bg-[#d9f3f2] px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#082342] ring-1 ring-[#87d8d8]">
       {children}
     </h2>
   );
@@ -118,11 +120,25 @@ function Field({
 }
 
 const inp =
-  "w-full border border-slate-300 rounded-md px-2.5 py-1.5 text-sm text-slate-800 bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent transition";
+  "w-full rounded-lg border border-[#87d8d8] bg-white px-2.5 py-2 text-sm font-medium text-[#082342] transition focus:border-[#0f9fa6] focus:ring-2 focus:ring-[#b7eceb]";
 const sel =
-  "w-full border border-slate-300 rounded-md px-2.5 py-1.5 text-sm text-slate-800 bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent transition";
+  "w-full rounded-lg border border-[#87d8d8] bg-white px-2.5 py-2 text-sm font-medium text-[#082342] transition focus:border-[#0f9fa6] focus:ring-2 focus:ring-[#b7eceb]";
 const numInp =
-  "w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm text-right text-slate-800 bg-white focus:ring-2 focus:ring-blue-400";
+  "w-full rounded-lg border border-[#87d8d8] bg-white px-2 py-2 text-right text-sm font-medium text-[#082342] transition focus:border-[#0f9fa6] focus:ring-2 focus:ring-[#b7eceb]";
+
+const phoneDigits = (value: string) => value.replace(/\D/g, "").slice(0, 10);
+
+function serviceDescriptionValue(value: string) {
+  const trimmed = value.trim();
+  const shortcut = trimmed.toLowerCase();
+
+  if (shortcut === "r") return "R&R";
+  if (shortcut === "d") return "Denting";
+  if (shortcut === "p") return "Painting";
+  if (shortcut === "o") return "Others";
+
+  return value;
+}
 
 // ─── PARTS TABLE ──────────────────────────────────────────────────────────────
 function PartsTable({
@@ -130,6 +146,7 @@ function PartsTable({
   docType,
   gstRate,
   onChange,
+  onMrpChange,
   onAdd,
   onRemove,
 }: {
@@ -137,6 +154,7 @@ function PartsTable({
   docType: DocumentType;
   gstRate: number;
   onChange: (idx: number, field: keyof PartRow, val: string | number) => void;
+  onMrpChange: (idx: number, mrpTotal: number) => void;
   onAdd: () => void;
   onRemove: (idx: number) => void;
 }) {
@@ -147,7 +165,7 @@ function PartsTable({
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-slate-100 text-slate-600 font-semibold">
+            <tr className="bg-slate-50 text-slate-600 font-black">
               <th className="px-2 py-2 text-center w-8">#</th>
               <th className="px-2 py-2 text-left min-w-[160px]">Part Name*</th>
               <th className="px-2 py-2 text-center min-w-[90px]">Description</th>
@@ -162,7 +180,7 @@ function PartsTable({
               )}
               <th className="px-2 py-2 text-right min-w-[90px]">Taxable</th>
               <th className="px-2 py-2 text-right min-w-[90px]">
-                Parts Total
+                Parts Total (MRP)
               </th>
               <th className="px-2 py-2 w-8"></th>
             </tr>
@@ -174,7 +192,7 @@ function PartsTable({
               return (
                 <tr
                   key={i}
-                  className="border-t border-slate-100 hover:bg-blue-50/30"
+                  className="border-t border-[#d7eeee] hover:bg-[#fff2c4]/60"
                 >
                   <td className="px-2 py-1.5 text-center text-slate-500">
                     {i + 1}
@@ -263,15 +281,24 @@ function PartsTable({
                   <td className="px-2 py-1.5 text-right text-slate-600 font-medium">
                     {fmt(taxable)}
                   </td>
-                  <td className="px-2 py-1.5 text-right text-slate-800 font-semibold">
-                    {fmt(rowTotal)}
+                  <td className="px-1 py-1">
+                    <input
+                      className={`${numInp} font-semibold`}
+                      type="number"
+                      value={Number(rowTotal.toFixed(2))}
+                      onChange={(e) =>
+                        onMrpChange(i, parseFloat(e.target.value) || 0)
+                      }
+                      min={0}
+                      step="0.01"
+                    />
                   </td>
                   <td className="px-1 py-1 text-center">
                     <button
                       onClick={() => onRemove(i)}
-                      className="text-red-400 hover:text-red-600 text-base font-bold leading-none"
+                      className="rounded-md px-2 text-base font-black leading-none text-[#f47d61] hover:bg-[#ffe1d8] hover:text-[#9d351f]"
                     >
-                      ×
+                      X
                     </button>
                   </td>
                 </tr>
@@ -292,7 +319,7 @@ function PartsTable({
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
+        className="mt-3 flex items-center gap-1 text-sm font-black text-[#0f9fa6] hover:text-[#087d86]"
       >
         <span className="text-lg leading-none">+</span> Add Part
       </button>
@@ -325,7 +352,7 @@ function ServicesTable({
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-slate-100 text-slate-600 font-semibold">
+            <tr className="bg-slate-50 text-slate-600 font-black">
               <th className="px-2 py-2 text-center w-8">#</th>
               <th className="px-2 py-2 text-left min-w-[160px]">Service Name*</th>
               <th className="px-2 py-2 text-center min-w-[100px]">Description</th>
@@ -352,7 +379,7 @@ function ServicesTable({
               return (
                 <tr
                   key={i}
-                  className="border-t border-slate-100 hover:bg-blue-50/30"
+                  className="border-t border-[#d7eeee] hover:bg-[#fff2c4]/60"
                 >
                   <td className="px-2 py-1.5 text-center text-slate-500">
                     {partsCount + i + 1}
@@ -370,9 +397,9 @@ function ServicesTable({
                       className={inp}
                       value={sv.description}
                       onChange={(e) =>
-                        onChange(i, "description", e.target.value)
+                        onChange(i, "description", serviceDescriptionValue(e.target.value))
                       }
-                      placeholder="R&R, Denting, Paint..."
+                      placeholder="R/R, D/Denting, P/Painting, O/Others"
                     />
                   </td>
                   <td className="px-1 py-1">
@@ -451,9 +478,9 @@ function ServicesTable({
                   <td className="px-1 py-1 text-center">
                     <button
                       onClick={() => onRemove(i)}
-                      className="text-red-400 hover:text-red-600 text-base font-bold leading-none"
+                      className="rounded-md px-2 text-base font-black leading-none text-[#f47d61] hover:bg-[#ffe1d8] hover:text-[#9d351f]"
                     >
-                      ×
+                      X
                     </button>
                   </td>
                 </tr>
@@ -474,7 +501,7 @@ function ServicesTable({
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
+        className="mt-3 flex items-center gap-1 text-sm font-black text-[#0f9fa6] hover:text-[#087d86]"
       >
         <span className="text-lg leading-none">+</span> Add Service
       </button>
@@ -513,23 +540,22 @@ function TotalsSummary({
       val: fmt(grand.sgst),
     },
     { label: "Total GST", val: fmt(grand.totalGst), bold: true },
-    { label: "Grand Total", val: `₹ ${fmt(grand.grandTotal)}`, bold: true, big: true },
-    { label: "Round Off", val: `₹ ${fmt(grand.roundOff)}`, bold: true, big: true },
+    { label: "Grand Total", val: `Rs. ${fmt(grand.grandTotal)}`, bold: true, big: true },
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-      <h3 className="text-sm font-bold text-slate-700 mb-3">Live Totals</h3>
+    <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-4 shadow-sm">
+      <h3 className="mb-3 text-sm font-black text-[#082342]">Live Totals</h3>
       <div className="space-y-1.5">
         {rows.map((r) => (
           <div
             key={r.label}
             className={`flex justify-between items-center ${
               r.big
-                ? "text-base font-bold text-blue-700 border-t border-slate-200 pt-2 mt-2"
+                ? "text-base font-black text-[#0f9fa6] border-t border-[#87d8d8] pt-2 mt-2"
                 : r.bold
-                ? "text-sm font-semibold text-slate-800"
-                : "text-xs text-slate-600"
+                ? "text-sm font-semibold text-[#082342]"
+                : "text-xs text-[#35526f]"
             }`}
           >
             <span>{r.label}</span>
@@ -547,12 +573,34 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
   const [form, setForm] = useState<BillFormData>({
     ...DEFAULT_FORM,
     ...initialData,
+    documentType: "ESTIMATE",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [documentNumberAuto, setDocumentNumberAuto] = useState(
+    !initialData?.documentNumber
+  );
 
   const set = (field: keyof BillFormData, val: unknown) =>
     setForm((f) => ({ ...f, [field]: val }));
+
+  const loadNextDocumentNumber = useCallback(async () => {
+    try {
+      const res = await fetch("/api/document-number?type=ESTIMATE");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load number");
+      setForm((f) => ({ ...f, documentNumber: data.documentNumber }));
+      setDocumentNumberAuto(true);
+    } catch {
+      setDocumentNumberAuto(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialData?.documentNumber) {
+      loadNextDocumentNumber();
+    }
+  }, [initialData?.documentNumber, loadNextDocumentNumber]);
 
   // Parts handlers
   const addPart = useCallback(
@@ -585,6 +633,27 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
         parts: f.parts.map((p, i) =>
           i === idx ? { ...p, [field]: val } : p
         ),
+      })),
+    []
+  );
+
+  const updatePartMrp = useCallback(
+    (idx: number, mrpTotal: number) =>
+      setForm((f) => ({
+        ...f,
+        parts: f.parts.map((p, i) => {
+          if (i !== idx) return p;
+          const taxableUnit = getTaxableUnitFromMrp(
+            mrpTotal,
+            Number(p.quantity),
+            Number(p.gstRate)
+          );
+          return {
+            ...p,
+            unitPrice: taxableUnit,
+            payableAmount: taxableUnit,
+          };
+        }),
       })),
     []
   );
@@ -658,13 +727,19 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
       setError("Customer Name, Vehicle No, and Vehicle Name are required.");
       return;
     }
+    const gstinValidation = validateGstin(form.companyGstin);
+    if (!gstinValidation.isValid) {
+      setError(gstinValidation.message);
+      set("companyGstin", gstinValidation.normalized);
+      return;
+    }
     setError("");
     setLoading(true);
     try {
       const res = await fetch("/api/bills", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, documentNumberAuto }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save");
@@ -677,6 +752,8 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
 
   const isEstimate = form.documentType === "ESTIMATE";
   const isTax = form.documentType === "TAX_INVOICE";
+  const companyGstinValidation = validateGstin(form.companyGstin);
+  const companyGstinTouched = form.companyGstin.trim().length > 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -684,29 +761,37 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
       <div className="lg:col-span-3 space-y-6">
 
         {/* ── DOCUMENT TYPE & BASIC INFO ── */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
           <SectionTitle>Document Information</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <Field label="Document Type" required className="col-span-2 md:col-span-1">
-              <select
-                className={sel}
-                value={form.documentType}
-                onChange={(e) => setDocType(e.target.value as DocumentType)}
-              >
-                {Object.entries(DOC_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
-              </select>
+              <div className={`${inp} bg-slate-100`}>{DOC_LABELS.ESTIMATE}</div>
+              <p className="text-xs text-slate-500 mt-1">
+                New billing chains start with an Estimate.
+              </p>
             </Field>
             <Field label={DOC_NUM_LABELS[form.documentType]}>
-              <input
-                className={inp}
-                value={form.documentNumber}
-                onChange={(e) => set("documentNumber", e.target.value)}
-                placeholder="Auto or enter manually"
-              />
+              <div className="flex gap-2">
+                <input
+                  className={inp}
+                  value={form.documentNumber}
+                  onChange={(e) => {
+                    setDocumentNumberAuto(false);
+                    set("documentNumber", e.target.value);
+                  }}
+                  placeholder="Auto or enter manually"
+                />
+                <button
+                  type="button"
+                  onClick={loadNextDocumentNumber}
+                  className="shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-md transition text-xs"
+                >
+                  Auto
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Auto-generated, but editable before saving.
+              </p>
             </Field>
             <Field label="Date" required>
               <input
@@ -772,14 +857,14 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
                   onChange={(e) => set("serviceType", e.target.value)}
                   placeholder="Type service type"
                 />
-                <p className="text-xs text-amber-600 mt-1">📝 Note: Type your service type</p>
+                <p className="mt-1 text-xs font-semibold text-amber-700">Note: Type your service type</p>
               </Field>
             )}
           </div>
         </div>
 
         {/* ── GARAGE INFO ── */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
           <SectionTitle>Garage Information</SectionTitle>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Garage Name" required>
@@ -806,8 +891,12 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
             <Field label="Contact No">
               <input
                 className={inp}
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                pattern="\d{10}"
                 value={form.garageContact}
-                onChange={(e) => set("garageContact", e.target.value)}
+                onChange={(e) => set("garageContact", phoneDigits(e.target.value))}
               />
             </Field>
             <Field label="Email">
@@ -822,7 +911,7 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
         </div>
 
         {/* ── CUSTOMER & VEHICLE ── */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
           <SectionTitle>Customer & Vehicle Details</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Field label="Customer Name" required className="md:col-span-1">
@@ -836,8 +925,12 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
             <Field label="Customer Phone">
               <input
                 className={inp}
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                pattern="\d{10}"
                 value={form.customerPhone}
-                onChange={(e) => set("customerPhone", e.target.value)}
+                onChange={(e) => set("customerPhone", phoneDigits(e.target.value))}
                 placeholder="7396812000"
               />
             </Field>
@@ -890,7 +983,7 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
         </div>
 
         {/* ── INSURANCE COMPANY ── */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
           <SectionTitle>Insurance Company Details</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Field label="Company Name" className="md:col-span-2">
@@ -906,7 +999,7 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
                   }
                 }}
               >
-                <option value="">— Select Insurance Company —</option>
+                <option value="">- Select Insurance Company -</option>
                 {INSURANCE_COMPANIES.map((name) => (
                   <option key={name} value={name}>{name}</option>
                 ))}
@@ -925,14 +1018,18 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
                   onChange={(e) => set("companyName", e.target.value)}
                   placeholder="Type insurance company name"
                 />
-                <p className="text-xs text-amber-600 mt-1">📝 Note: Type the insurance company name manually</p>
+                <p className="mt-1 text-xs font-semibold text-amber-700">Note: Type the insurance company name manually</p>
               </Field>
             )}
             <Field label="Mobile No">
               <input
                 className={inp}
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                pattern="\d{10}"
                 value={form.companyMobile}
-                onChange={(e) => set("companyMobile", e.target.value)}
+                onChange={(e) => set("companyMobile", phoneDigits(e.target.value))}
               />
             </Field>
             <Field label="Address" className="md:col-span-2">
@@ -975,32 +1072,42 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
                 placeholder="500003"
               />
             </Field>
-            <Field label="Company GSTIN">
+            <Field label="Company GSTIN" required>
               <input
-                className={inp}
+                className={`${inp} ${
+                  companyGstinValidation.isValid
+                    ? "border-green-500 focus:ring-green-400"
+                    : companyGstinTouched
+                    ? "border-red-500 focus:ring-red-400"
+                    : ""
+                }`}
+                type="text"
+                maxLength={15}
+                aria-invalid={!companyGstinValidation.isValid}
                 value={form.companyGstin}
-                onChange={(e) => set("companyGstin", e.target.value)}
-                placeholder="37AABCC6633K5ZE"
+                onChange={(e) => set("companyGstin", normalizeGstin(e.target.value))}
+                placeholder="22AAAAA0000A1Z5"
               />
             </Field>
           </div>
         </div>
 
         {/* ── PARTS TABLE ── */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
           <SectionTitle>Parts / Spare Parts</SectionTitle>
           <PartsTable
             parts={form.parts}
             docType={form.documentType}
             gstRate={form.gstRate}
             onChange={updatePart}
+            onMrpChange={updatePartMrp}
             onAdd={addPart}
             onRemove={removePart}
           />
         </div>
 
         {/* ── SERVICES TABLE ── */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="rounded-lg border border-[#87d8d8] bg-[#fffaf0] p-5 shadow-sm">
           <SectionTitle>Labour / Services</SectionTitle>
           <ServicesTable
             services={form.services}
@@ -1023,13 +1130,13 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold px-8 py-2.5 rounded-lg transition text-sm"
+            className="rounded-lg bg-[#082342] px-8 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0f9fa6] disabled:bg-[#e9dec5]"
           >
-            {loading ? "Saving..." : "💾 Save & Generate PDF"}
+            {loading ? "Saving..." : "Save Estimate"}
           </button>
           <button
             onClick={() => router.push("/")}
-            className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-6 py-2.5 rounded-lg transition text-sm"
+            className="rounded-lg bg-slate-100 px-6 py-2.5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-200"
           >
             Cancel
           </button>
@@ -1038,15 +1145,15 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
 
       {/* ── SIDEBAR: LIVE TOTALS ── */}
       <div className="lg:col-span-1">
-        <div className="sticky top-4">
+        <div className="sticky top-20">
           <TotalsSummary form={form} />
 
-          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
-            <p className="font-semibold mb-1">💡 Tips:</p>
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+            <p className="mb-1 font-black">Tips</p>
             <ul className="space-y-1 list-disc list-inside">
-              <li>GST defaults to 18% — change per row or globally</li>
+              <li>GST defaults to 18% - change per row or globally</li>
               <li>For Estimates, set Payable Amount separately</li>
-              <li>PDF downloads after saving</li>
+              <li>Convert Estimate to Proforma only after details are ready</li>
             </ul>
           </div>
         </div>
