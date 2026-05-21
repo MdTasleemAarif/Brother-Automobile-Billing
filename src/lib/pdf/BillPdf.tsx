@@ -418,15 +418,22 @@ function formatBillDate(date: Date) {
 }
 
 function formatPrintDateTime(date: Date) {
-  const d = new Date(date);
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-  const year = String(d.getFullYear()).slice(-2);
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const period = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  return `${month}/${day}/${year}, ${hours}:${minutes} ${period}`;
+  const parts = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).formatToParts(date);
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value || "";
+
+  return `${getPart("day")}/${getPart("month")}/${getPart("year")}, ${getPart(
+    "hour"
+  )}:${getPart("minute")} ${getPart("dayPeriod").toUpperCase()}`;
 }
 
 function formatInsuranceAddress(bill: BillWithItems) {
