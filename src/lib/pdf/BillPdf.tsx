@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import path from "path";
 import {
   Document,
   Page,
@@ -21,25 +20,8 @@ import {
 } from "../calculations";
 import { numberToWords } from "../numberToWords";
 
-const WINDOWS_FONTS_DIR = "C:\\Windows\\Fonts";
-
-Font.register({
-  family: "TimesNewRoman",
-  fonts: [
-    { src: path.join(WINDOWS_FONTS_DIR, "times.ttf"), fontWeight: 400 },
-    { src: path.join(WINDOWS_FONTS_DIR, "timesbd.ttf"), fontWeight: 700 },
-    {
-      src: path.join(WINDOWS_FONTS_DIR, "timesi.ttf"),
-      fontWeight: 400,
-      fontStyle: "italic" as const,
-    },
-    {
-      src: path.join(WINDOWS_FONTS_DIR, "timesbi.ttf"),
-      fontWeight: 700,
-      fontStyle: "italic" as const,
-    },
-  ],
-});
+const TIMES_REGULAR = "Times-Roman";
+const TIMES_BOLD = "Times-Bold";
 
 Font.registerHyphenationCallback((word: string) => [word]);
 
@@ -52,7 +34,7 @@ const C = {
 
 const s = StyleSheet.create({
   page: {
-    fontFamily: "TimesNewRoman",
+    fontFamily: TIMES_REGULAR,
     fontSize: 9.4,
     color: C.text,
     paddingTop: 14,
@@ -86,8 +68,7 @@ const s = StyleSheet.create({
   },
   headerCenter: { flex: 1, alignItems: "center", paddingHorizontal: 4 },
   h1: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 15.4,
     textAlign: "center",
     marginBottom: 6,
@@ -95,8 +76,7 @@ const s = StyleSheet.create({
   hAddress: { fontSize: 9.3, textAlign: "center", lineHeight: 1.6 },
   h2: { fontSize: 9.9, textAlign: "center", lineHeight: 1.4 },
   docTypeLabel: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 12.2,
     textAlign: "center",
     marginBottom: 8,
@@ -158,8 +138,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   vehicleNoText: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 11.2,
   },
   infoCell: {
@@ -174,7 +153,7 @@ const s = StyleSheet.create({
     padding: "4 5",
     justifyContent: "center",
   },
-  bold: { fontFamily: "TimesNewRoman", fontWeight: 700 },
+  bold: { fontFamily: TIMES_BOLD },
   tableWrap: {
     borderTopWidth: 1,
     borderLeftWidth: 1,
@@ -201,8 +180,7 @@ const s = StyleSheet.create({
   },
   tCellLast: { padding: "2.5 3", justifyContent: "center" },
   tHdrText: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 7.9,
     textAlign: "center",
   },
@@ -228,16 +206,14 @@ const s = StyleSheet.create({
   },
   subRow: { flexDirection: "row", minHeight: 13, alignItems: "center" },
   subLabel: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 9,
     width: 92,
     textAlign: "left",
     paddingRight: 6,
   },
   subVal: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 9,
     width: 90,
     textAlign: "right",
@@ -307,23 +283,20 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
   },
   grandLabel: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 9.4,
     width: 112,
     textAlign: "left",
     paddingRight: 6,
   },
   grandVal: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 9.4,
     width: 108,
     textAlign: "right",
   },
   grandTotalText: {
-    fontFamily: "TimesNewRoman",
-    fontWeight: 700,
+    fontFamily: TIMES_BOLD,
     fontSize: 10.8,
   },
   amountWords: {
@@ -373,9 +346,9 @@ const ESTIMATE_PART_COLS: Column[] = [
   { key: "hsnSac", label: "HSN /\nSAC", w: 50, align: "center" },
   { key: "gstRate", label: "GST Rate\n(%)", w: 44, align: "center" },
   { key: "quantity", label: "Quantity", w: 42, align: "center" },
-  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 58, align: "right" },
-  { key: "payableAmount", label: "Payable Amount\n(\u20B9)", w: 62, align: "right" },
-  { key: "taxable", label: "Taxable\n(\u20B9)", w: 64, align: "right" },
+  { key: "unitPrice", label: "Unit Price\n(Rs.)", w: 58, align: "right" },
+  { key: "payableAmount", label: "Payable Amount\n(Rs.)", w: 62, align: "right" },
+  { key: "taxable", label: "Taxable\n(Rs.)", w: 64, align: "right" },
   { key: "partsTotal", label: "Parts Total\n(MRP)", w: 80, align: "right" },
 ];
 
@@ -386,8 +359,8 @@ const STANDARD_PART_COLS: Column[] = [
   { key: "hsnSac", label: "HSN /\nSAC", w: 54, align: "center" },
   { key: "gstRate", label: "GST Rate\n(%)", w: 52, align: "center" },
   { key: "quantity", label: "Quantity", w: 48, align: "center" },
-  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 68, align: "right" },
-  { key: "taxable", label: "Taxable\n(\u20B9)", w: 68, align: "right" },
+  { key: "unitPrice", label: "Unit Price\n(Rs.)", w: 68, align: "right" },
+  { key: "taxable", label: "Taxable\n(Rs.)", w: 68, align: "right" },
   { key: "partsTotal", label: "Parts Total\n(MRP)", w: 72, align: "right" },
 ];
 
@@ -398,10 +371,10 @@ const ESTIMATE_SVC_COLS: Column[] = [
   { key: "hsnSac", label: "HSN /\nSAC", w: 50, align: "center" },
   { key: "gstRate", label: "GST Rate\n(%)", w: 44, align: "center" },
   { key: "quantity", label: "Quantity", w: 42, align: "center" },
-  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 58, align: "right" },
-  { key: "payableAmount", label: "Payable Amount\n(\u20B9)", w: 62, align: "right" },
-  { key: "taxable", label: "Taxable\n(\u20B9)", w: 64, align: "right" },
-  { key: "labourTotal", label: "Labour Total\n(\u20B9)", w: 80, align: "right" },
+  { key: "unitPrice", label: "Unit Price\n(Rs.)", w: 58, align: "right" },
+  { key: "payableAmount", label: "Payable Amount\n(Rs.)", w: 62, align: "right" },
+  { key: "taxable", label: "Taxable\n(Rs.)", w: 64, align: "right" },
+  { key: "labourTotal", label: "Labour Total\n(Rs.)", w: 80, align: "right" },
 ];
 
 const STANDARD_SVC_COLS: Column[] = [
@@ -411,13 +384,13 @@ const STANDARD_SVC_COLS: Column[] = [
   { key: "hsnSac", label: "HSN /\nSAC", w: 54, align: "center" },
   { key: "gstRate", label: "GST Rate\n(%)", w: 52, align: "center" },
   { key: "quantity", label: "Quantity", w: 48, align: "center" },
-  { key: "unitPrice", label: "Unit Price\n(\u20B9)", w: 68, align: "right" },
-  { key: "taxable", label: "Taxable\n(\u20B9)", w: 68, align: "right" },
-  { key: "labourTotal", label: "Labour Total\n(\u20B9)", w: 72, align: "right" },
+  { key: "unitPrice", label: "Unit Price\n(Rs.)", w: 68, align: "right" },
+  { key: "taxable", label: "Taxable\n(Rs.)", w: 68, align: "right" },
+  { key: "labourTotal", label: "Labour Total\n(Rs.)", w: 72, align: "right" },
 ];
 
 function Rupee() {
-  return <Text style={{ fontFamily: "TimesNewRoman" }}>{"\u20B9"}</Text>;
+  return <Text>Rs.</Text>;
 }
 
 function MoneyText({
@@ -880,21 +853,21 @@ function TaxSummaryTable({
     <View style={s.taxWrap} wrap={false}>
       <View style={s.taxHdr}>
         <View style={[s.taxCell, { width: cellW.w1 }]}>
-          <Text style={s.tHdrText}>Taxable Value ({"\u20B9"})</Text>
+          <Text style={s.tHdrText}>Taxable Value (Rs.)</Text>
         </View>
         <View style={[s.taxCell, { width: cellW.w2 }]}>
           <Text style={s.tHdrText}>CGST</Text>
           <Text style={s.tHdrText}>%</Text>
         </View>
         <View style={[s.taxCell, { width: cellW.w3 }]}>
-          <Text style={s.tHdrText}>Amt ({"\u20B9"})</Text>
+          <Text style={s.tHdrText}>Amt (Rs.)</Text>
         </View>
         <View style={[s.taxCell, { width: cellW.w4 }]}>
           <Text style={s.tHdrText}>SGST</Text>
           <Text style={s.tHdrText}>%</Text>
         </View>
         <View style={[s.taxCellLast, { width: cellW.w5 }]}>
-          <Text style={s.tHdrText}>Amt ({"\u20B9"})</Text>
+          <Text style={s.tHdrText}>Amt (Rs.)</Text>
         </View>
       </View>
 

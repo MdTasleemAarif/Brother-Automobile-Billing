@@ -743,10 +743,18 @@ export function QuotationEditor() {
           position: relative;
           width: 210mm;
           min-height: 297mm;
+          box-sizing: border-box;
           margin: auto;
           background: white;
           padding: 12mm;
           box-shadow: 0 20px 60px rgba(8, 35, 66, 0.25);
+        }
+
+        .quotation-paper.exporting {
+          height: 297mm;
+          min-height: 297mm;
+          overflow: hidden;
+          box-shadow: none;
         }
 
         .quotation-letter-head {
@@ -971,7 +979,9 @@ export function QuotationEditor() {
 
           .quotation-paper {
             width: 210mm;
+            height: 297mm;
             min-height: 297mm;
+            box-sizing: border-box;
             margin: 0;
             box-shadow: none;
           }
