@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
 
 const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/logout"];
+const PUBLIC_PREFIXES = ["/api/share/"];
 
 function isPublicAsset(pathname: string) {
   return (
@@ -15,7 +16,11 @@ function isPublicAsset(pathname: string) {
 }
 
 function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.includes(pathname) || isPublicAsset(pathname);
+  return (
+    PUBLIC_PATHS.includes(pathname) ||
+    PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    isPublicAsset(pathname)
+  );
 }
 
 export async function middleware(req: NextRequest) {

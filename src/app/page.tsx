@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BillsTable } from "@/components/BillsTable";
+import { createBillPdfShareToken } from "@/lib/shareTokens";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function HomePage() {
       documentType: true,
       isLocked: true,
       customerName: true,
+      customerPhone: true,
       vehicleName: true,
       vehicleNo: true,
       serviceType: true,
@@ -62,7 +64,13 @@ export default async function HomePage() {
           </Link>
         </div>
       ) : (
-        <BillsTable bills={bills.map((b) => ({ ...b, date: b.date.toISOString() }))} />
+        <BillsTable
+          bills={bills.map((b) => ({
+            ...b,
+            date: b.date.toISOString(),
+            shareToken: createBillPdfShareToken(b.id),
+          }))}
+        />
       )}
     </div>
   );

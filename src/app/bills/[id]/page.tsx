@@ -4,6 +4,8 @@ import Link from "next/link";
 import { DOC_LABELS, DOC_NUM_LABELS } from "@/lib/types";
 import { DeleteButton } from "@/components/DeleteButton";
 import { ConvertButton } from "@/components/ConvertButton";
+import { WhatsAppShareButton } from "@/components/WhatsAppShareButton";
+import { createBillPdfShareToken } from "@/lib/shareTokens";
 import {
   calcGrandTotals,
   calcPartsTotals,
@@ -45,6 +47,7 @@ export default async function BillDetailPage({
   if (!bill) return notFound();
 
   const docType = bill.documentType as "ESTIMATE" | "PROFORMA" | "TAX_INVOICE";
+  const shareToken = createBillPdfShareToken(bill.id);
   const isEstimate = docType === "ESTIMATE";
   const chainId = bill.chainId || bill.id;
   const chainDocs = await prisma.bill.findMany({
@@ -135,6 +138,15 @@ export default async function BillDetailPage({
             >
               Download PDF
             </a>
+            <WhatsAppShareButton
+              billId={bill.id}
+              customerPhone={bill.customerPhone}
+              customerName={bill.customerName}
+              documentLabel={DOC_LABELS[docType]}
+              documentNumber={bill.documentNumber}
+              vehicleNo={bill.vehicleNo}
+              shareToken={shareToken}
+            />
             <Link
               href={`/bills/${bill.id}/edit`}
               className="rounded-lg bg-[#082342] px-5 py-2 text-sm font-extrabold text-white transition hover:bg-[#0f9fa6]"

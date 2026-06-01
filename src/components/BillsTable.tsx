@@ -3,16 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { DOC_LABELS } from "@/lib/types";
+import { WhatsAppShareButton } from "@/components/WhatsAppShareButton";
 
 type Bill = {
   id: string;
   documentNumber: string | null;
   documentType: string;
   customerName: string;
+  customerPhone: string | null;
   vehicleName: string;
   vehicleNo: string;
   serviceType: string | null;
   date: string | Date;
+  shareToken: string;
 };
 
 const TYPE_BADGE: Record<string, string> = {
@@ -177,20 +180,70 @@ export function BillsTable({ bills }: { bills: Bill[] }) {
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/bills/${bill.id}`}
-                        className="mr-3 font-black text-[#082342] hover:text-[#0f9fa6]"
+                        className="font-black text-[#082342] hover:text-[#0f9fa6]"
                       >
                         View
                       </Link>
                       <a
                         href={`/api/bills/${bill.id}/pdf`}
                         download
-                        className="font-black text-[#0f9fa6] hover:text-[#087d86]"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#ffd0d0] bg-white text-[#dc0000] shadow-sm transition hover:border-[#dc0000] hover:bg-[#fff1f1]"
+                        title="Download PDF"
+                        aria-label={`Download PDF for ${bill.documentNumber || bill.vehicleNo}`}
                       >
-                        PDF
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 32 32"
+                          className="h-7 w-7"
+                          fill="none"
+                        >
+                          <path
+                            d="M8 3.5h11l5 5V28H8z"
+                            fill="white"
+                            stroke="#111827"
+                            strokeWidth="2.2"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M19 3.5v5h5"
+                            fill="white"
+                            stroke="#111827"
+                            strokeWidth="2.2"
+                            strokeLinejoin="round"
+                          />
+                          <rect x="4" y="12" width="15" height="8" rx="1.5" fill="#dc0000" />
+                          <text
+                            x="11.5"
+                            y="17.7"
+                            textAnchor="middle"
+                            fontSize="5.4"
+                            fontWeight="900"
+                            fill="white"
+                            fontFamily="Arial, sans-serif"
+                          >
+                            PDF
+                          </text>
+                          <path d="M22.5 14v8.5" stroke="#dc0000" strokeWidth="2.5" strokeLinecap="round" />
+                          <path d="m18.5 19.5 4 4 4-4" fill="#dc0000" stroke="#dc0000" strokeWidth="1.6" strokeLinejoin="round" />
+                        </svg>
                       </a>
+                      <WhatsAppShareButton
+                        billId={bill.id}
+                        customerPhone={bill.customerPhone}
+                        customerName={bill.customerName}
+                        documentLabel={
+                          DOC_LABELS[bill.documentType as keyof typeof DOC_LABELS] ||
+                          bill.documentType
+                        }
+                        documentNumber={bill.documentNumber}
+                        vehicleNo={bill.vehicleNo}
+                        shareToken={bill.shareToken}
+                      />
+                      </div>
                     </td>
                   </tr>
                 ))}
