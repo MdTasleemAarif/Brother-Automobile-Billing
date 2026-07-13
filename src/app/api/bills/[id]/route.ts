@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { BillFormData } from "@/lib/types";
 import { isDocumentNumberTaken, normalizeDocumentNumber } from "@/lib/documentNumbers";
-import { normalizeGstin, validateGstin } from "@/utils/validateGstin";
+import { normalizeGstin, validateOptionalGstin } from "@/utils/validateGstin";
 
 function validateBillForm(body: BillFormData) {
   if (!body.customerName?.trim() || !body.vehicleNo?.trim() || !body.vehicleName?.trim()) {
     return "Customer Name, Vehicle No, and Vehicle Name are required.";
   }
 
-  const gstinValidation = validateGstin(body.companyGstin);
+  const gstinValidation = validateOptionalGstin(body.companyGstin);
   if (!gstinValidation.isValid) {
     return gstinValidation.message;
   }

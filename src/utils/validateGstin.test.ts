@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { normalizeGstin, validateGstin } from "./validateGstin.ts";
+import { normalizeGstin, validateGstin, validateOptionalGstin } from "./validateGstin.ts";
 
 describe("validateGstin", () => {
   it("accepts a valid GSTIN", () => {
@@ -20,6 +20,13 @@ describe("validateGstin", () => {
 
     assert.equal(result.isValid, false);
     assert.equal(result.message, "GST number is required");
+  });
+
+  it("accepts empty optional GSTIN", () => {
+    const result = validateOptionalGstin("");
+
+    assert.equal(result.isValid, true);
+    assert.equal(result.normalized, "");
   });
 
   it("rejects wrong length", () => {

@@ -21,7 +21,8 @@ import {
 } from "@/lib/calculations";
 import { INSURANCE_COMPANIES } from "@/lib/insuranceCompanies";
 import { SERVICE_TYPES } from "@/lib/serviceTypes";
-import { normalizeGstin, validateGstin } from "@/utils/validateGstin";
+import { normalizeGstin, validateOptionalGstin } from "@/utils/validateGstin";
+import { DecimalInput } from "@/components/DecimalInput";
 
 const DEFAULT_GARAGE = {
   garageName: "BROTHERS AUTOMOBILES",
@@ -247,17 +248,13 @@ function PartsTable({
                     />
                   </td>
                   <td className="px-1 py-1">
-                    <input
+                    <DecimalInput
                       className={numInp}
-                      type="number"
                       value={p.unitPrice}
-                      onChange={(e) => {
-                        const v = parseFloat(e.target.value) || 0;
+                      onValueChange={(v) => {
                         onChange(i, "unitPrice", v);
                         if (isEstimate) onChange(i, "payableAmount", v);
                       }}
-                      min={0}
-                      step="0.01"
                     />
                   </td>
                   {isEstimate && (
@@ -438,17 +435,13 @@ function ServicesTable({
                     />
                   </td>
                   <td className="px-1 py-1">
-                    <input
+                    <DecimalInput
                       className={numInp}
-                      type="number"
                       value={sv.unitPrice}
-                      onChange={(e) => {
-                        const v = parseFloat(e.target.value) || 0;
+                      onValueChange={(v) => {
                         onChange(i, "unitPrice", v);
                         if (isEstimate) onChange(i, "payableAmount", v);
                       }}
-                      min={0}
-                      step="0.01"
                     />
                   </td>
                   {isEstimate && (
@@ -727,7 +720,7 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
       setError("Customer Name, Vehicle No, and Vehicle Name are required.");
       return;
     }
-    const gstinValidation = validateGstin(form.companyGstin);
+    const gstinValidation = validateOptionalGstin(form.companyGstin);
     if (!gstinValidation.isValid) {
       setError(gstinValidation.message);
       set("companyGstin", gstinValidation.normalized);
@@ -752,7 +745,7 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
 
   const isEstimate = form.documentType === "ESTIMATE";
   const isTax = form.documentType === "TAX_INVOICE";
-  const companyGstinValidation = validateGstin(form.companyGstin);
+  const companyGstinValidation = validateOptionalGstin(form.companyGstin);
   const companyGstinTouched = form.companyGstin.trim().length > 0;
 
   return (
@@ -1072,10 +1065,10 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
                 placeholder="500003"
               />
             </Field>
-            <Field label="Company GSTIN" required>
+            <Field label="Company GSTIN">
               <input
                 className={`${inp} ${
-                  companyGstinValidation.isValid
+                  companyGstinTouched && companyGstinValidation.isValid
                     ? "border-green-500 focus:ring-green-400"
                     : companyGstinTouched
                     ? "border-red-500 focus:ring-red-400"
@@ -1083,7 +1076,7 @@ export function BillForm({ initialData }: { initialData?: Partial<BillFormData> 
                 }`}
                 type="text"
                 maxLength={15}
-                aria-invalid={!companyGstinValidation.isValid}
+                aria-invalid={companyGstinTouched && !companyGstinValidation.isValid}
                 value={form.companyGstin}
                 onChange={(e) => set("companyGstin", normalizeGstin(e.target.value))}
                 placeholder="22AAAAA0000A1Z5"

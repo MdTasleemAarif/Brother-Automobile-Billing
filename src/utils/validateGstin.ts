@@ -44,3 +44,17 @@ export function validateGstin(value: string): GstinValidationResult {
     normalized,
   };
 }
+
+export function validateOptionalGstin(value: string): GstinValidationResult {
+  const normalized = normalizeGstin(value);
+
+  if (!normalized) {
+    return {
+      isValid: true,
+      message: "",
+      normalized,
+    };
+  }
+
+  return validateGstin(normalized);
+}

@@ -6,7 +6,7 @@ import {
   normalizeDocumentNumber,
   reserveDocumentNumber,
 } from "@/lib/documentNumbers";
-import { normalizeGstin, validateGstin } from "@/utils/validateGstin";
+import { normalizeGstin, validateOptionalGstin } from "@/utils/validateGstin";
 
 export async function GET() {
   try {
@@ -26,7 +26,7 @@ function validateBillForm(body: BillFormData) {
     return "Customer Name, Vehicle No, and Vehicle Name are required.";
   }
 
-  const gstinValidation = validateGstin(body.companyGstin);
+  const gstinValidation = validateOptionalGstin(body.companyGstin);
   if (!gstinValidation.isValid) {
     return gstinValidation.message;
   }

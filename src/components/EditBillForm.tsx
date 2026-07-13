@@ -21,7 +21,8 @@ import {
 } from "@/lib/calculations";
 import { INSURANCE_COMPANIES } from "@/lib/insuranceCompanies";
 import { SERVICE_TYPES } from "@/lib/serviceTypes";
-import { normalizeGstin, validateGstin } from "@/utils/validateGstin";
+import { normalizeGstin, validateOptionalGstin } from "@/utils/validateGstin";
+import { DecimalInput } from "@/components/DecimalInput";
 
 function newPart(serialNo: number, gstRate: number): PartRow {
   return {
@@ -159,7 +160,7 @@ function PartsTable({
                     <input className={numInp} type="number" value={p.quantity} onChange={(e) => onChange(i, "quantity", parseFloat(e.target.value) || 1)} min={0.01} step="0.01" />
                   </td>
                   <td className="px-1 py-1">
-                    <input className={numInp} type="number" value={p.unitPrice} onChange={(e) => { const v = parseFloat(e.target.value) || 0; onChange(i, "unitPrice", v); if (isEstimate) onChange(i, "payableAmount", v); }} min={0} step="0.01" />
+                    <DecimalInput className={numInp} value={p.unitPrice} onValueChange={(v) => { onChange(i, "unitPrice", v); if (isEstimate) onChange(i, "payableAmount", v); }} />
                   </td>
                   {isEstimate && (
                     <td className="px-1 py-1">
@@ -249,7 +250,7 @@ function ServicesTable({
                     <input className={numInp} type="number" value={sv.quantity} onChange={(e) => onChange(i, "quantity", parseFloat(e.target.value) || 1)} min={0.01} step="0.01" />
                   </td>
                   <td className="px-1 py-1">
-                    <input className={numInp} type="number" value={sv.unitPrice} onChange={(e) => { const v = parseFloat(e.target.value) || 0; onChange(i, "unitPrice", v); if (isEstimate) onChange(i, "payableAmount", v); }} min={0} step="0.01" />
+                    <DecimalInput className={numInp} value={sv.unitPrice} onValueChange={(v) => { onChange(i, "unitPrice", v); if (isEstimate) onChange(i, "payableAmount", v); }} />
                   </td>
                   {isEstimate && (
                     <td className="px-1 py-1">
@@ -362,7 +363,7 @@ export function EditBillForm({
       setError("Customer Name, Vehicle No, and Vehicle Name are required.");
       return;
     }
-    const gstinValidation = validateGstin(form.companyGstin);
+    const gstinValidation = validateOptionalGstin(form.companyGstin);
     if (!gstinValidation.isValid) {
       setError(gstinValidation.message);
       set("companyGstin", gstinValidation.normalized);
@@ -386,7 +387,7 @@ export function EditBillForm({
   };
 
   const isEstimate = form.documentType === "ESTIMATE";
-  const companyGstinValidation = validateGstin(form.companyGstin);
+  const companyGstinValidation = validateOptionalGstin(form.companyGstin);
   const companyGstinTouched = form.companyGstin.trim().length > 0;
 
   return (
@@ -562,10 +563,10 @@ export function EditBillForm({
             <Field label="Pincode">
               <input className={inp} value={form.companyPincode} onChange={(e) => set("companyPincode", e.target.value)} />
             </Field>
-            <Field label="Company GSTIN" required>
+            <Field label="Company GSTIN">
               <input
                 className={`${inp} ${
-                  companyGstinValidation.isValid
+                  companyGstinTouched && companyGstinValidation.isValid
                     ? "border-green-500 focus:ring-green-400"
                     : companyGstinTouched
                     ? "border-red-500 focus:ring-red-400"
@@ -573,7 +574,7 @@ export function EditBillForm({
                 }`}
                 type="text"
                 maxLength={15}
-                aria-invalid={!companyGstinValidation.isValid}
+                aria-invalid={companyGstinTouched && !companyGstinValidation.isValid}
                 value={form.companyGstin}
                 onChange={(e) => set("companyGstin", normalizeGstin(e.target.value))}
                 placeholder="22AAAAA0000A1Z5"
